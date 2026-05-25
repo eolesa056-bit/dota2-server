@@ -146,13 +146,13 @@
       <button class="confirm-btn" id="registerBtn">✅ ПРОДОЛЖИТЬ</button>
     </div>
     <div class="screen" id="heroesScreen">
-      <h2 style="color:#ff3030;text-align:center;margin-bottom:12px;font-size:1.3rem;text-shadow:0 0 15px rgba(255,0,0,0.5);">ВЫБЕРИТЕ ГЕРОЯ</h2>
+      <h2 style="color:#ff3030;text-align:center;margin-bottom:12px;font-size:1.3rem;">ВЫБЕРИТЕ ГЕРОЯ</h2>
       <div class="attribute-tabs"><div class="attr-tab strength active" data-attr="strength">💪 Сила</div><div class="attr-tab agility" data-attr="agility">🏹 Ловкость</div><div class="attr-tab intelligence" data-attr="intelligence">📖 Интеллект</div></div>
       <div class="hero-grid" id="heroGrid"></div>
     </div>
     <div class="screen" id="partyScreen">
-      <h2 style="color:#ff3030;text-align:center;margin-bottom:18px;font-size:1.3rem;text-shadow:0 0 15px rgba(255,0,0,0.5);">👥 ПАТИ И ДРУЗЬЯ</h2>
-      <div class="party-container"><div><div class="party-section"><div class="section-title">👥 Моя пати (<span id="partyCount">1</span>/5)</div><div id="partySlots"><div class="player-slot">Вы (лидер)</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div></div></div><div class="friends-section" style="margin-top:12px;"><div class="section-title">👫 Друзья</div><input type="text" class="add-friend-input" placeholder="Никнейм друга..."><button class="small-btn" style="width:100%;">Добавить</button></div></div><div><div class="lobby-section"><div class="section-title">🌍 Лобби (<span id="onlineCount">0</span>)</div><div id="lobbyPlayers" style="max-height:220px;overflow-y:auto;"></div></div></div></div>
+      <h2 style="color:#ff3030;text-align:center;margin-bottom:18px;font-size:1.3rem;">👥 ПАТИ И ДРУЗЬЯ</h2>
+      <div class="party-container"><div><div class="party-section"><div class="section-title">👥 Моя пати (<span id="partyCount">1</span>/5)</div><div id="partySlots"><div class="player-slot">Вы (лидер)</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div></div></div><div class="friends-section" style="margin-top:12px;"><div class="section-title">👫 Друзья</div><input type="text" class="add-friend-input" id="addFriendInput" placeholder="Никнейм друга..."><button class="small-btn" style="width:100%;" onclick="addFriend()">Добавить</button><div id="friendsList" style="margin-top:8px;"></div></div></div><div><div class="lobby-section"><div class="section-title">🌍 Лобби (<span id="onlineCount">0</span>)</div><div id="lobbyPlayers" style="max-height:220px;overflow-y:auto;"></div></div></div></div>
     </div>
     <div class="screen bp-screen" id="battlepassScreen">
       <div class="bp-header">🔥 ПРОБУЖДЕНИЕ ДРЕВНИХ — 1 СЕЗОН</div>
@@ -172,7 +172,7 @@
     </div>
     <div class="screen game-screen" id="gameScreen">
       <canvas id="gameCanvas"></canvas>
-      <div class="dead-overlay" id="deadOverlay"><div style="color:#ff3030;font-size:1.8rem;font-weight:bold;text-shadow:0 0 20px #ff0000;">💀 ВЫ ПАЛИ 💀</div><button class="respawn-btn" id="respawnBtn">🔄 ВОЗРОДИТЬСЯ</button><button class="nav-btn" style="margin-top:10px;" id="backToMenuFromDeath">↩️ В МЕНЮ</button></div>
+      <div class="dead-overlay" id="deadOverlay"><div style="color:#ff3030;font-size:1.8rem;font-weight:bold;">💀 ВЫ ПАЛИ 💀</div><button class="respawn-btn" id="respawnBtn">🔄 ВОЗРОДИТЬСЯ</button><button class="nav-btn" style="margin-top:10px;" id="backToMenuFromDeath">↩️ В МЕНЮ</button></div>
       <div class="info-panel"><span id="heroDisplayName">⚔️</span><div class="hp-bar"><div id="playerHpFill" class="hp-fill" style="width:100%;"></div></div><span>🏆<span id="killCount">0</span></span><button class="nav-btn" id="backToMenuBtn">↩️</button></div>
       <div class="mobile-controls" id="mobileControls"><div style="display:grid;grid-template-areas:'.. up ..' 'left .. right' '.. down ..';gap:4px;"><button class="mobile-btn" style="grid-area:up;" id="btnUp">▲</button><button class="mobile-btn" style="grid-area:left;" id="btnLeft">◄</button><button class="mobile-btn" style="grid-area:right;" id="btnRight">►</button><button class="mobile-btn" style="grid-area:down;" id="btnDown">▼</button></div><button class="mobile-btn attack-mobile-btn" id="btnAttack">⚔️ АТАКА</button></div>
     </div>
@@ -202,59 +202,136 @@
 <div class="admin-panel" id="adminPanel"><button class="close-admin-btn" onclick="closeAdminPanel()">✕</button><h3>👑 Админ-панель</h3><div class="admin-section"><h4>🎫 Промокод (валюта)</h4><input class="admin-input" id="promoCodeInput" placeholder="Код"><input type="number" class="admin-input" id="promoAmountInput" placeholder="Сумма"><button class="admin-btn-gold" onclick="createPromoCode()">Создать</button></div><div class="admin-section"><h4>🔥 Промокод на Батл Пасс</h4><input class="admin-input" id="bpPromoCodeInput" placeholder="Код"><select class="admin-input" id="bpPromoType"><option value="premium">Обычный БП</option><option value="plus">БП +</option></select><button class="admin-btn-gold" onclick="createBPPromoCode()">Создать</button></div><div class="admin-section"><h4>🚫 Бан</h4><input class="admin-input" id="banNicknameInput" placeholder="Никнейм"><button class="admin-btn-gold" onclick="banPlayer()">Бан</button><button class="admin-btn-gold" onclick="unbanPlayer()">Разбан</button></div><div class="admin-section"><h4>🪙 Выдать валюту</h4><input class="admin-input" id="giveCurrencyNickname" placeholder="Никнейм"><input type="number" class="admin-input" id="giveCurrencyAmount" placeholder="Сумма"><button class="admin-btn-gold" onclick="giveCurrency()">Выдать</button></div><div class="admin-section"><h4>👥 Игроки</h4><div id="playerList" style="max-height:150px;overflow-y:auto;"></div></div></div>
 
 <script>
+// ========== ПОДКЛЮЧЕНИЕ К СЕРВЕРУ ==========
 const isMobile=/Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
 if(isMobile)document.getElementById('mobileControls').style.display='flex';
+
 const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
 function resizeCanvas(){canvas.width=Math.min(window.innerWidth-20,1000);canvas.height=Math.min(window.innerHeight-250,500);}
 resizeCanvas();window.addEventListener('resize',resizeCanvas);
 
-let currentUser=null,currentAttr='strength',selectedHeroId='axe',selectedSkin=0,ws=null,myId=null,gameState={players:[],enemies:[]},gameActive=!1,confirmedPlayers=0,currencyTimer=0;
-const totalPlayers=10,DEV_CODE='DOTA2_DEV',promoCodes=new Map(),bpPromoCodes=new Map(),bannedPlayers=new Set(),usedNicknames=new Set();
-let playerWallets=new Map(),playerSkins=new Map(),friendsList=new Map(),partyMembers=[],playerBP=new Map();
+let ws=null,myId=null,currentUser=null,currentAttr='strength',selectedHeroId='axe',selectedSkin=0;
+let gameState={players:[],enemies:[]},gameActive=!1,confirmedPlayers=0,currencyTimer=0;
+const totalPlayers=10,DEV_CODE='DOTA2_DEV';
+let playerWallet=0,playerBPData={type:'free',level:1,xp:0},playerSkinsData={},playerFriends=[],playerParty=[],onlinePlayers=[];
 
-promoCodes.set('DOTA100',100);promoCodes.set('DOTA500',500);promoCodes.set('DOTA1000',1000);
-bpPromoCodes.set('BPFREE','premium');bpPromoCodes.set('BPPLUS','plus');
+const heroes={strength:[{id:'axe',name:'Axe',avatar:'🪓',hp:130,dmg:38,speed:2.8,desc:'Могучий воин с топором.',skins:[{name:'Кровавый воин',price:0},{name:'Громовой берсерк',price:500},{name:'Огненный разрушитель',price:1000}]},{id:'pudge',name:'Pudge',avatar:'🪝',hp:150,dmg:42,speed:2.4,desc:'Толстый мясник с крюком.',skins:[{name:'Мясник',price:0},{name:'Убийца',price:500},{name:'Повар',price:1000}]},{id:'sven',name:'Sven',avatar:'⚔️',hp:120,dmg:45,speed:3.0,desc:'Рыцарь с огромным мечом.',skins:[{name:'Стальной',price:0},{name:'Мистик',price:500},{name:'Король',price:1000}]}],agility:[{id:'antimage',name:'Anti-Mage',avatar:'🌀',hp:100,dmg:34,speed:4.0,desc:'Охотник на магов.',skins:[{name:'Магический',price:0},{name:'Лунный',price:500},{name:'Теневой',price:1000}]},{id:'sniper',name:'Sniper',avatar:'🎯',hp:85,dmg:40,speed:3.2,desc:'Меткий стрелок.',skins:[{name:'Снайпер',price:0},{name:'Арбалет',price:500},{name:'Взрыв',price:1000}]},{id:'shadowfiend',name:'Shadow Fiend',avatar:'👻',hp:100,dmg:50,speed:3.5,desc:'Тёмный лорд.',skins:[{name:'Тьма',price:0},{name:'Души',price:500},{name:'Демон',price:1000}]}],intelligence:[{id:'lina',name:'Lina',avatar:'🔥',hp:95,dmg:44,speed:3.1,desc:'Огненная волшебница.',skins:[{name:'Пламя',price:0},{name:'Вулкан',price:500},{name:'Метеор',price:1000}]}]};
 
-function getWallet(n){if(!playerWallets.has(n))playerWallets.set(n,0);return playerWallets.get(n);}
-function getBP(n){if(!playerBP.has(n))playerBP.set(n,{type:'free',level:1,xp:0});return playerBP.get(n);}
-function getPurchasedSkins(u){if(!playerSkins.has(u))playerSkins.set(u,{});return playerSkins.get(u);}
-function isSkinPurchased(u,h,i){if(i===0)return!0;const s=getPurchasedSkins(u);return s[h]&&s[h].includes(i);}
-function purchaseSkin(u,h,i){const s=getPurchasedSkins(u);if(!s[h])s[h]=[0];if(!s[h].includes(i))s[h].push(i);playerSkins.set(u,s);}
-function updateCurrencyDisplay(){if(currentUser)document.getElementById('currencyAmount').textContent=getWallet(currentUser);}
-function showFloatingText(text){const el=document.createElement('div');el.textContent=text;el.style.cssText='position:fixed;top:20%;left:50%;transform:translateX(-50%);color:#ff4444;font-weight:bold;font-size:1.3rem;z-index:9999;animation:floatUp 2s forwards;pointer-events:none;text-shadow:0 0 10px #ff0000;';document.body.appendChild(el);setTimeout(()=>el.remove(),2000);}
-
-const heroes={strength:[{id:'axe',name:'Axe',avatar:'🪓',hp:130,dmg:38,speed:2.8,desc:'Могучий воин с топором. Врывается в битву и крушит врагов.',skins:[{name:'Кровавый воин',price:0},{name:'Громовой берсерк',price:500},{name:'Огненный разрушитель',price:1000}]},{id:'pudge',name:'Pudge',avatar:'🪝',hp:150,dmg:42,speed:2.4,desc:'Толстый мясник с крюком.',skins:[{name:'Мясник',price:0},{name:'Убийца',price:500},{name:'Повар',price:1000}]},{id:'sven',name:'Sven',avatar:'⚔️',hp:120,dmg:45,speed:3.0,desc:'Рыцарь с огромным мечом.',skins:[{name:'Стальной',price:0},{name:'Мистик',price:500},{name:'Король',price:1000}]}],agility:[{id:'antimage',name:'Anti-Mage',avatar:'🌀',hp:100,dmg:34,speed:4.0,desc:'Охотник на магов.',skins:[{name:'Магический',price:0},{name:'Лунный',price:500},{name:'Теневой',price:1000}]},{id:'sniper',name:'Sniper',avatar:'🎯',hp:85,dmg:40,speed:3.2,desc:'Меткий стрелок.',skins:[{name:'Снайпер',price:0},{name:'Арбалет',price:500},{name:'Взрыв',price:1000}]},{id:'shadowfiend',name:'Shadow Fiend',avatar:'👻',hp:100,dmg:50,speed:3.5,desc:'Тёмный лорд.',skins:[{name:'Тьма',price:0},{name:'Души',price:500},{name:'Демон',price:1000}]}],intelligence:[{id:'lina',name:'Lina',avatar:'🔥',hp:95,dmg:44,speed:3.1,desc:'Огненная волшебница.',skins:[{name:'Пламя',price:0},{name:'Вулкан',price:500},{name:'Метеор',price:1000}]}]};
-
-function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.remove('active'));const map={register:'registerScreen',heroes:'heroesScreen',party:'partyScreen',battlepass:'battlepassScreen',finding:'findingScreen',game:'gameScreen'};if(map[name])document.getElementById(map[name]).classList.add('active');const btn=document.querySelector(`.nav-btn[data-screen="${name}"]`);if(btn)btn.classList.add('active');if(name==='battlepass')updateBPDisplay();}
-document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>{btn.addEventListener('click',()=>{if(!currentUser&&btn.dataset.screen!=='register'){showScreen('register');return;}if(btn.dataset.screen==='finding'){confirmedPlayers=0;updateSquares();}showScreen(btn.dataset.screen);});});
-
-function registerUser(nickname){
-  if(!nickname){document.getElementById('errorMsg').textContent='Введите ник!';document.getElementById('errorMsg').style.display='block';return;}
-  if(bannedPlayers.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='⛔ Вы забанены!';document.getElementById('errorMsg').style.display='block';return;}
-  if(usedNicknames.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='Ник занят!';document.getElementById('errorMsg').style.display='block';return;}
-  usedNicknames.add(nickname.toLowerCase());currentUser=nickname;
-  document.getElementById('userInfo').textContent='👤 '+nickname;
-  if(nickname.toLowerCase()==='root'){document.getElementById('adminBtn').style.display='inline-block';document.getElementById('userInfo').textContent+=' 👑';}
-  document.getElementById('errorMsg').style.display='none';document.getElementById('nicknameInput').value='';
-  updateCurrencyDisplay();updateLobby();
+function connectWebSocket(){
   const protocol=window.location.protocol==='https:'?'wss:':'ws:';
   ws=new WebSocket(`${protocol}//${window.location.host}`);
-  ws.onopen=()=>{ws.send(JSON.stringify({type:'nickname',nickname:nickname}));ws.send(JSON.stringify({type:'heroSelect',heroId:selectedHeroId,skinIndex:selectedSkin}));};
-  ws.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.type==='init')myId=d.playerId;if(d.type==='update')gameState=d;};
-  showScreen('heroes');renderHeroGrid();
+  
+  ws.onopen=()=>console.log('✅ Подключено к серверу');
+  
+  ws.onmessage=(e)=>{
+    const data=JSON.parse(e.data);
+    
+    if(data.type==='registerSuccess'){
+      myId=data.playerId;
+      currentUser=data.nickname;
+      playerWallet=data.wallet;
+      playerBPData=data.bp;
+      playerSkinsData=data.skins||{};
+      playerFriends=data.friends||[];
+      playerParty=data.party||[];
+      onlinePlayers=data.onlinePlayers||[];
+      
+      document.getElementById('userInfo').textContent='👤 '+currentUser;
+      if(currentUser==='root'){document.getElementById('adminBtn').style.display='inline-block';document.getElementById('userInfo').textContent+=' 👑';}
+      document.getElementById('currencyAmount').textContent=playerWallet;
+      updateFriendsList();
+      updatePartyDisplay();
+      updateLobby();
+      updateBPDisplay();
+      showScreen('heroes');
+      renderHeroGrid();
+    }
+    
+    if(data.type==='error'){alert(data.message);}
+    if(data.type==='promoSuccess'){playerWallet=data.wallet;document.getElementById('currencyAmount').textContent=playerWallet;alert(`+${data.amount}🪙!`);}
+    if(data.type==='promoError'){alert(data.message);}
+    if(data.type==='bpPromoSuccess'){playerBPData=data.bp;updateBPDisplay();alert(`Батл Пасс ${data.bpType} активирован!`);}
+    if(data.type==='heroUpdated'){selectedHeroId=data.hero.heroId;selectedSkin=data.hero.skinIndex;renderHeroGrid();}
+    if(data.type==='skinBought'){playerWallet=data.wallet;playerSkinsData=data.skins;selectedSkin=data.hero.skinIndex;document.getElementById('currencyAmount').textContent=playerWallet;renderHeroGrid();}
+    if(data.type==='friendsUpdated'){playerFriends=data.friends;updateFriendsList();}
+    if(data.type==='partyUpdated'){playerParty=data.party;updatePartyDisplay();}
+    if(data.type==='invitedToParty'){alert(`Вас пригласил в пати ${data.by}!`);}
+    if(data.type==='banned'){alert('⛔ Вы забанены!');ws.close();location.reload();}
+    if(data.type==='banSuccess'){alert(`${data.target} забанен!`);}
+    if(data.type==='onlineUpdate'){onlinePlayers=data.onlinePlayers;updateLobby();}
+    if(data.type==='update'){gameState=data;}
+  };
+  
+  ws.onclose=()=>{console.log('Соединение закрыто');};
+  ws.onerror=()=>{console.log('Ошибка соединения');};
 }
 
-document.getElementById('registerBtn').addEventListener('click',()=>{const n=document.getElementById('nicknameInput').value.trim();if(n.toLowerCase()==='root'){document.getElementById('devCodeOverlay').classList.add('show');document.getElementById('devCodeInput').value='';document.getElementById('devCodeError').textContent='';}else registerUser(n);});
-document.getElementById('devCodeBtn').addEventListener('click',()=>{const code=document.getElementById('devCodeInput').value.trim();if(code===DEV_CODE){document.getElementById('devCodeOverlay').classList.remove('show');registerUser('root');}else document.getElementById('devCodeError').textContent='Неверный код доступа!';});
-document.getElementById('devCodeInput').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('devCodeBtn').click();});
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.remove('active'));
+  const map={register:'registerScreen',heroes:'heroesScreen',party:'partyScreen',battlepass:'battlepassScreen',finding:'findingScreen',game:'gameScreen'};
+  if(map[name])document.getElementById(map[name]).classList.add('active');
+  const btn=document.querySelector(`.nav-btn[data-screen="${name}"]`);
+  if(btn)btn.classList.add('active');
+  if(name==='battlepass')updateBPDisplay();
+}
 
-function renderHeroGrid(){const grid=document.getElementById('heroGrid');grid.innerHTML='';const ch=heroes[currentAttr];if(!ch)return;ch.forEach(h=>{const card=document.createElement('div');card.className=`hero-card ${h.id===selectedHeroId?'selected':''}`;card.innerHTML=`<div class="hero-avatar">${h.avatar}</div><div class="hero-name">${h.name}</div>`;card.onclick=function(){selectedHeroId=h.id;if(currentUser){const ss=getPurchasedSkins(currentUser);selectedSkin=(ss[h.id]&&ss[h.id][0])||0;}renderHeroGrid();showHeroDetail(h.id);};grid.appendChild(card);});}
+document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(!currentUser&&btn.dataset.screen!=='register'){showScreen('register');return;}
+    if(btn.dataset.screen==='finding'){confirmedPlayers=0;updateSquares();}
+    showScreen(btn.dataset.screen);
+  });
+});
 
-function showHeroDetail(heroId){const hero=Object.values(heroes).flat().find(h=>h.id===heroId);if(!hero)return;document.getElementById('heroDesc').innerHTML=`<h3 style="color:#ff3030;">${hero.name}</h3><p style="margin:10px 0;color:#ffaaaa;">${hero.desc}</p><p style="color:#ff8888;">❤️ ${hero.hp} | ⚔️ ${hero.dmg} | 🏃 ${hero.speed}</p>`;document.getElementById('heroModel').innerHTML=`<div class="hero-detail-avatar">${hero.avatar}</div><p style="color:#ff3030;margin-top:12px;font-size:1.1rem;">${hero.name}</p>`;const wallet=currentUser?getWallet(currentUser):0;document.getElementById('heroSkins').innerHTML='<h4 style="color:#ff3030;margin-bottom:10px;">Скины</h4>'+hero.skins.map((s,i)=>{const purchased=isSkinPurchased(currentUser,heroId,i);return `<div class="skin-option ${i===selectedSkin?'selected':''} ${!purchased&&i>0?'locked':''}" onclick="${purchased?`window.selectSkin('${heroId}',${i})`:i>0?`window.buySkin('${heroId}',${i},${s.price})`:`window.selectSkin('${heroId}',0)`}"><span>${s.name}</span>${i>0&&!purchased?`<span class="skin-price">${s.price}🪙</span>`:i>0?'<span style="color:#4CAF50;">✓</span>':'<span class="skin-price">Бесплатно</span>'}</div>`;}).join('');document.getElementById('heroDetailOverlay').classList.add('show');}
+document.getElementById('registerBtn').addEventListener('click',()=>{
+  const n=document.getElementById('nicknameInput').value.trim();
+  if(!n){document.getElementById('errorMsg').textContent='Введите ник!';document.getElementById('errorMsg').style.display='block';return;}
+  if(n.toLowerCase()==='root'){
+    document.getElementById('devCodeOverlay').classList.add('show');
+    document.getElementById('devCodeInput').value='';
+    document.getElementById('devCodeError').textContent='';
+  }else{
+    document.getElementById('errorMsg').style.display='none';
+    document.getElementById('nicknameInput').value='';
+    connectWebSocket();
+    setTimeout(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'register',nickname:n}));},500);
+  }
+});
+
+document.getElementById('devCodeBtn').addEventListener('click',()=>{
+  const code=document.getElementById('devCodeInput').value.trim();
+  if(code===DEV_CODE){
+    document.getElementById('devCodeOverlay').classList.remove('show');
+    connectWebSocket();
+    setTimeout(()=>{if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'register',nickname:'root'}));},500);
+  }else{document.getElementById('devCodeError').textContent='Неверный код!';}
+});
+
+function renderHeroGrid(){
+  const grid=document.getElementById('heroGrid');grid.innerHTML='';
+  const ch=heroes[currentAttr];if(!ch)return;
+  ch.forEach(h=>{
+    const card=document.createElement('div');
+    card.className=`hero-card ${h.id===selectedHeroId?'selected':''}`;
+    card.innerHTML=`<div class="hero-avatar">${h.avatar}</div><div class="hero-name">${h.name}</div>`;
+    card.onclick=function(){selectedHeroId=h.id;renderHeroGrid();showHeroDetail(h.id);
+      if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'heroSelect',nickname:currentUser,heroId:h.id,skinIndex:selectedSkin}));};
+    grid.appendChild(card);
+  });
+}
+
+function showHeroDetail(heroId){
+  const hero=Object.values(heroes).flat().find(h=>h.id===heroId);if(!hero)return;
+  document.getElementById('heroDesc').innerHTML=`<h3 style="color:#ff3030;">${hero.name}</h3><p style="margin:10px 0;color:#ffaaaa;">${hero.desc}</p><p style="color:#ff8888;">❤️ ${hero.hp} | ⚔️ ${hero.dmg} | 🏃 ${hero.speed}</p>`;
+  document.getElementById('heroModel').innerHTML=`<div class="hero-detail-avatar">${hero.avatar}</div><p style="color:#ff3030;margin-top:12px;font-size:1.1rem;">${hero.name}</p>`;
+  document.getElementById('heroSkins').innerHTML='<h4 style="color:#ff3030;margin-bottom:10px;">Скины</h4>'+hero.skins.map((s,i)=>{const purchased=i===0||(playerSkinsData[heroId]&&playerSkinsData[heroId].includes(i));return `<div class="skin-option ${i===selectedSkin?'selected':''} ${!purchased&&i>0?'locked':''}" onclick="${purchased?`selectSkin('${heroId}',${i})`:i>0?`buySkin('${heroId}',${i},${s.price})`:`selectSkin('${heroId}',0)`}"><span>${s.name}</span>${i>0&&!purchased?`<span class="skin-price">${s.price}🪙</span>`:i>0?'<span style="color:#4CAF50;">✓</span>':'<span class="skin-price">Бесплатно</span>'}</div>`;}).join('');
+  document.getElementById('heroDetailOverlay').classList.add('show');
+}
 
 function closeHeroDetail(){document.getElementById('heroDetailOverlay').classList.remove('show');}
-window.selectSkin=function(hId,idx){selectedSkin=idx;if(currentUser){const s=getPurchasedSkins(currentUser);if(!s[hId])s[hId]=[0];s[hId]=s[hId].filter(x=>x!==idx);s[hId].unshift(idx);playerSkins.set(currentUser,s);}renderHeroGrid();showHeroDetail(hId);};
-window.buySkin=function(hId,idx,price){if(!currentUser)return;if(getWallet(currentUser)>=price){playerWallets.set(currentUser,getWallet(currentUser)-price);purchaseSkin(currentUser,hId,idx);selectedSkin=idx;updateCurrencyDisplay();renderHeroGrid();showHeroDetail(hId);alert('Скин куплен!');}else alert(`Недостаточно монет! Нужно ${price}🪙`);};
+window.selectSkin=function(hId,idx){selectedSkin=idx;renderHeroGrid();showHeroDetail(hId);if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'heroSelect',nickname:currentUser,heroId:hId,skinIndex:idx}));};
+window.buySkin=function(hId,idx,price){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'buySkin',nickname:currentUser,heroId:hId,skinIndex:idx,price:price}));};
 
 document.querySelectorAll('.attr-tab').forEach(tab=>{tab.addEventListener('click',function(){currentAttr=this.dataset.attr;document.querySelectorAll('.attr-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');if(heroes[currentAttr]&&heroes[currentAttr].length>0){selectedHeroId=heroes[currentAttr][0].id;selectedSkin=0;renderHeroGrid();closeHeroDetail();}});});
 document.getElementById('heroDetailOverlay').addEventListener('click',function(e){if(e.target===this)closeHeroDetail();});
@@ -263,35 +340,114 @@ function updateSquares(){const g=document.getElementById('squaresGrid');g.innerH
 document.getElementById('confirmSearchBtn').addEventListener('click',()=>{if(confirmedPlayers<totalPlayers){confirmedPlayers++;updateSquares();if(confirmedPlayers>=totalPlayers)setTimeout(()=>showScreen('heroes'),600);}});
 document.getElementById('cancelSearchBtn').addEventListener('click',()=>showScreen('heroes'));
 
-function updatePartyDisplay(){for(let i=0;i<5;i++){const slot=document.getElementById(`partySlot${i}`);if(i===0){slot.innerHTML=currentUser?`${currentUser} (лидер)`:'Вы (лидер)';slot.className='player-slot';}else if(partyMembers[i-1]){slot.innerHTML=partyMembers[i-1];slot.className='player-slot';}else{slot.innerHTML='Пусто';slot.className='player-slot empty';}}document.getElementById('partyCount').textContent=1+partyMembers.length;}
-window.addFriend=function(){if(!currentUser)return;const f=document.getElementById('addFriendInput').value.trim().toLowerCase();if(!f||!usedNicknames.has(f))return alert('Игрок не найден!');if(!friendsList.has(currentUser))friendsList.set(currentUser,[]);const fl=friendsList.get(currentUser);if(!fl.includes(f)){fl.push(f);friendsList.set(currentUser,fl);updateFriendsList();document.getElementById('addFriendInput').value='';}};
-window.inviteToParty=function(n){if(partyMembers.length>=4)return alert('Пати заполнена!');if(!partyMembers.includes(n)){partyMembers.push(n);updatePartyDisplay();}};
-function updateFriendsList(){const c=document.getElementById('friendsList');if(!currentUser){c.innerHTML='';return;}const f=friendsList.get(currentUser)||[];c.innerHTML=f.map(x=>`<div class="lobby-player"><span>👤 ${x}</span><button class="invite-btn" onclick="inviteToParty('${x}')">Пригласить</button></div>`).join('');}
-function updateLobby(){const c=document.getElementById('lobbyPlayers');const all=Array.from(usedNicknames);document.getElementById('onlineCount').textContent=all.length;c.innerHTML=all.map(n=>{const isBanned=bannedPlayers.has(n);return `<div class="lobby-player" style="${isBanned?'opacity:0.5;text-decoration:line-through;':''}"><span>👤 ${n} ${isBanned?'🚫':''}</span>${!isBanned?`<button class="invite-btn" onclick="inviteToParty('${n}')">Пригласить</button>`:'<span style="color:#ff4444;">Забанен</span>'}</div>`;}).join('');}
+function updatePartyDisplay(){
+  const slots=document.getElementById('partySlots');
+  slots.innerHTML='';
+  for(let i=0;i<5;i++){
+    const slot=document.createElement('div');
+    if(i===0){slot.className='player-slot';slot.textContent=currentUser?`${currentUser} (лидер)`:'Вы (лидер)';}
+    else if(playerParty[i]){slot.className='player-slot';slot.textContent=playerParty[i];}
+    else{slot.className='player-slot empty';slot.textContent='Пусто';}
+    slots.appendChild(slot);
+  }
+  document.getElementById('partyCount').textContent=playerParty.length||1;
+}
 
-function updateBPDisplay(){if(!currentUser)return;const bp=getBP(currentUser);document.getElementById('bpLevel').textContent=bp.level;document.getElementById('bpFill').style.width=(bp.level-1)+'%';document.getElementById('bpXP').textContent=bp.xp+'/100 XP';const premiumBtn=document.getElementById('bpPremiumBtn');const plusBtn=document.getElementById('bpPlusBtn');const upgradeBtn=document.getElementById('bpUpgradeBtn');if(premiumBtn){premiumBtn.textContent='Купить';premiumBtn.className='small-btn';premiumBtn.onclick=function(){buyBP('premium');};}if(plusBtn){plusBtn.textContent='Купить';plusBtn.className='small-btn';plusBtn.onclick=function(){buyBP('plus');};}if(upgradeBtn)upgradeBtn.style.display='inline-block';if(bp.type==='premium'){if(premiumBtn){premiumBtn.textContent='✅ Активирован';premiumBtn.className='small-btn btn-activated';premiumBtn.onclick=null;}}else if(bp.type==='plus'){if(premiumBtn){premiumBtn.textContent='✅ Активирован';premiumBtn.className='small-btn btn-activated';premiumBtn.onclick=null;}if(plusBtn){plusBtn.textContent='✅ Активирован';plusBtn.className='small-btn btn-activated';plusBtn.onclick=null;}if(upgradeBtn)upgradeBtn.style.display='none';}const rewards=document.getElementById('bpRewards');rewards.innerHTML='';for(let i=1;i<=100;i++){let unlocked,cls;if(bp.type==='free'){unlocked=bp.level>=i&&i%5===0;cls=unlocked?'unlocked':'locked-free';}else{unlocked=bp.level>=i;cls=unlocked?'unlocked':'';}rewards.innerHTML+=`<div class="bp-reward ${cls}">Ур.${i}<br>${unlocked?'🎁':'🔒'}</div>`;}}
+window.addFriend=function(){
+  const f=document.getElementById('addFriendInput').value.trim().toLowerCase();
+  if(!f)return;
+  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'addFriend',nickname:currentUser,friendName:f}));
+  document.getElementById('addFriendInput').value='';
+};
 
-window.buyBP=function(type){if(!currentUser)return;const bp=getBP(currentUser);if(bp.type==='premium'&&type==='premium')return alert('Уже активирован!');if(bp.type==='plus')return alert('Уже активирован Батл Пасс +!');const price=type==='premium'?5500:8000;if(getWallet(currentUser)>=price){playerWallets.set(currentUser,getWallet(currentUser)-price);bp.type=type;if(type==='plus')bp.level=Math.min(100,bp.level+25);playerBP.set(currentUser,bp);updateCurrencyDisplay();updateBPDisplay();alert(`Батл Пасс ${type==='premium'?'Обычный':'+'} активирован!`);}else alert('Недостаточно монет!');};
-window.upgradeBP=function(){if(!currentUser)return;const bp=getBP(currentUser);if(bp.type!=='premium')return alert('Сначала купите Обычный БП!');if(getWallet(currentUser)>=2500){playerWallets.set(currentUser,getWallet(currentUser)-2500);bp.type='plus';bp.level=Math.min(100,bp.level+25);playerBP.set(currentUser,bp);updateCurrencyDisplay();updateBPDisplay();alert('Батл Пасс улучшен до +!');}else alert('Недостаточно монет! Нужно 2500🪙');};
-window.createPromoCode=function(){const c=document.getElementById('promoCodeInput').value.trim();const a=parseInt(document.getElementById('promoAmountInput').value);if(c&&a>0){promoCodes.set(c.toUpperCase(),a);alert(`Промокод ${c.toUpperCase()} на ${a}🪙`);}};
-window.createBPPromoCode=function(){const c=document.getElementById('bpPromoCodeInput').value.trim();const t=document.getElementById('bpPromoType').value;if(c){bpPromoCodes.set(c.toUpperCase(),t);alert(`Промокод ${c.toUpperCase()} на ${t==='premium'?'Обычный':'+'} БП создан!`);}};
-window.banPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(!n)return alert('Введите ник!');bannedPlayers.add(n);alert(`${n} забанен!`);document.getElementById('banNicknameInput').value='';updatePlayerList();updateLobby();};
-window.unbanPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(!n)return alert('Введите ник!');if(bannedPlayers.has(n)){bannedPlayers.delete(n);alert(`${n} разбанен!`);}else alert('Не в бане');document.getElementById('banNicknameInput').value='';updatePlayerList();updateLobby();};
-window.giveCurrency=function(){const n=document.getElementById('giveCurrencyNickname').value.trim().toLowerCase();const a=parseInt(document.getElementById('giveCurrencyAmount').value);if(n&&a>0){playerWallets.set(n,getWallet(n)+a);alert(`Выдано ${a}🪙 игроку ${n}`);updatePlayerList();updateCurrencyDisplay();}};
+window.inviteToParty=function(n){
+  if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'inviteToParty',nickname:currentUser,targetName:n}));
+};
+
+function updateFriendsList(){
+  const c=document.getElementById('friendsList');
+  c.innerHTML=playerFriends.map(x=>`<div class="lobby-player"><span>👤 ${x}</span><button class="invite-btn" onclick="inviteToParty('${x}')">В пати</button></div>`).join('');
+}
+
+function updateLobby(){
+  const c=document.getElementById('lobbyPlayers');
+  document.getElementById('onlineCount').textContent=onlinePlayers.length;
+  c.innerHTML=onlinePlayers.map(n=>`<div class="lobby-player"><span>👤 ${n}</span>${n!==currentUser?`<button class="invite-btn" onclick="inviteToParty('${n}')">В пати</button>`:''}</div>`).join('');
+}
+
+function updateBPDisplay(){
+  document.getElementById('bpLevel').textContent=playerBPData.level;
+  document.getElementById('bpFill').style.width=(playerBPData.level-1)+'%';
+  document.getElementById('bpXP').textContent=(playerBPData.xp||0)+'/100 XP';
+  
+  const premiumBtn=document.getElementById('bpPremiumBtn');
+  const plusBtn=document.getElementById('bpPlusBtn');
+  const upgradeBtn=document.getElementById('bpUpgradeBtn');
+  
+  if(premiumBtn){premiumBtn.textContent='Купить';premiumBtn.className='small-btn';}
+  if(plusBtn){plusBtn.textContent='Купить';plusBtn.className='small-btn';}
+  if(upgradeBtn)upgradeBtn.style.display='inline-block';
+  
+  if(playerBPData.type==='premium'){
+    if(premiumBtn){premiumBtn.textContent='✅ Активирован';premiumBtn.className='small-btn btn-activated';}
+  }else if(playerBPData.type==='plus'){
+    if(premiumBtn){premiumBtn.textContent='✅ Активирован';premiumBtn.className='small-btn btn-activated';}
+    if(plusBtn){plusBtn.textContent='✅ Активирован';plusBtn.className='small-btn btn-activated';}
+    if(upgradeBtn)upgradeBtn.style.display='none';
+  }
+  
+  const rewards=document.getElementById('bpRewards');rewards.innerHTML='';
+  for(let i=1;i<=100;i++){
+    let unlocked=playerBPData.type==='free'?(playerBPData.level>=i&&i%5===0):(playerBPData.level>=i);
+    let cls=unlocked?'unlocked':(playerBPData.type==='free'?'locked-free':'');
+    rewards.innerHTML+=`<div class="bp-reward ${cls}">Ур.${i}<br>${unlocked?'🎁':'🔒'}</div>`;
+  }
+}
+
+window.buyBP=function(type){alert('Покупка БП через сервер в разработке');};
+window.upgradeBP=function(){alert('Улучшение БП через сервер в разработке');};
+
+// АДМИНКА
+window.createPromoCode=function(){
+  const c=document.getElementById('promoCodeInput').value.trim();
+  const a=parseInt(document.getElementById('promoAmountInput').value);
+  if(c&&a>0&&ws)ws.send(JSON.stringify({type:'createPromoCode',code:c,amount:a}));
+};
+window.createBPPromoCode=function(){
+  const c=document.getElementById('bpPromoCodeInput').value.trim();
+  const t=document.getElementById('bpPromoType').value;
+  if(c&&ws)ws.send(JSON.stringify({type:'createBPPromoCode',code:c,bpType:t}));
+};
+window.banPlayer=function(){
+  const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();
+  if(n&&ws)ws.send(JSON.stringify({type:'banPlayer',targetName:n}));
+};
+window.unbanPlayer=function(){
+  const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();
+  if(n&&ws)ws.send(JSON.stringify({type:'unbanPlayer',targetName:n}));
+};
+window.giveCurrency=function(){
+  const n=document.getElementById('giveCurrencyNickname').value.trim().toLowerCase();
+  const a=parseInt(document.getElementById('giveCurrencyAmount').value);
+  if(n&&a>0&&ws)ws.send(JSON.stringify({type:'giveCurrency',targetName:n,amount:a}));
+};
 window.closeAdminPanel=function(){document.getElementById('adminPanel').style.display='none';};
-function updatePlayerList(){const l=document.getElementById('playerList');if(l)l.innerHTML=Array.from(usedNicknames).map(n=>`<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>👤 ${n}</span><span>${getWallet(n)}🪙 BP:${getBP(n).type} Ур.${getBP(n).level} ${bannedPlayers.has(n)?'🚫':''}</span></div>`).join('');}
 
-document.getElementById('adminBtn').addEventListener('click',()=>{document.getElementById('adminPanel').style.display='block';updatePlayerList();});
-document.getElementById('promoBtn').addEventListener('click',()=>{if(!currentUser)return;const c=prompt('Введите промокод:');if(!c)return;if(promoCodes.has(c.toUpperCase())){const a=promoCodes.get(c.toUpperCase());playerWallets.set(currentUser,getWallet(currentUser)+a);promoCodes.delete(c.toUpperCase());alert(`+${a}🪙!`);updateCurrencyDisplay();}else if(bpPromoCodes.has(c.toUpperCase())){const t=bpPromoCodes.get(c.toUpperCase());const bp=getBP(currentUser);bp.type=t;if(t==='plus')bp.level=Math.min(100,bp.level+25);playerBP.set(currentUser,bp);bpPromoCodes.delete(c.toUpperCase());alert(`Батл Пасс ${t==='premium'?'Обычный':'+'} активирован!`);updateBPDisplay();}else alert('Неверный код');});
+document.getElementById('adminBtn').addEventListener('click',()=>{document.getElementById('adminPanel').style.display='block';});
+document.getElementById('promoBtn').addEventListener('click',()=>{
+  if(!currentUser)return;
+  const c=prompt('Введите промокод:');
+  if(c&&ws)ws.send(JSON.stringify({type:'promoCode',nickname:currentUser,code:c}));
+});
 
+// ИГРА
 const keys={};
-document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;keys[e.key.toLowerCase()]=!0;if(e.key===' '&&gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));e.preventDefault();});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;keys[e.key.toLowerCase()]=!0;if(e.key===' '&&gameActive&&ws)ws.send(JSON.stringify({type:'attack'}));e.preventDefault();});
 document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=!1;});
 ['btnUp','btnDown','btnLeft','btnRight'].forEach((id,i)=>{const btn=document.getElementById(id);if(!btn)return;const k=['w','s','a','d'][i];btn.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=!0;});btn.addEventListener('pointerup',()=>{keys[k]=!1;});btn.addEventListener('pointerleave',()=>{keys[k]=!1;});});
-document.getElementById('btnAttack')?.addEventListener('pointerdown',e=>{e.preventDefault();if(gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));});
+document.getElementById('btnAttack')?.addEventListener('pointerdown',e=>{e.preventDefault();if(gameActive&&ws)ws.send(JSON.stringify({type:'attack'}));});
 
-setInterval(()=>{if(!gameActive||!ws||ws.readyState!==WebSocket.OPEN)return;const me=gameState.players?.find(p=>p.id===myId);if(!me)return;let dx=0,dy=0;if(keys['w'])dy--;if(keys['s'])dy++;if(keys['a'])dx--;if(keys['d'])dx++;if(dx||dy){const l=Math.sqrt(dx*dx+dy*dy);ws.send(JSON.stringify({type:'move',x:Math.max(15,Math.min(canvas.width-15,me.x+dx/l*5)),y:Math.max(15,Math.min(canvas.height-15,me.y+dy/l*5))}));}document.getElementById('playerHpFill').style.width=Math.max(0,(me.hp/me.maxHp)*100)+'%';const ok=me.oldKills||0;if(me.kills>ok&&currentUser){const earned=(me.kills-ok)*5;playerWallets.set(currentUser,getWallet(currentUser)+earned);updateCurrencyDisplay();showFloatingText(`+${earned}🪙`);me.oldKills=me.kills;const bp=getBP(currentUser);bp.xp+=10;if(bp.xp>=100){bp.xp-=100;bp.level=Math.min(100,bp.level+1);showFloatingText(`🔥 Уровень БП: ${bp.level}!`);}playerBP.set(currentUser,bp);}document.getElementById('killCount').textContent=me.kills||0;if(me.hp<=0)document.getElementById('deadOverlay').classList.add('show');},1000/60);
-setInterval(()=>{if(currentUser&&gameActive){currencyTimer++;if(currencyTimer>=60){currencyTimer=0;const cur=getWallet(currentUser);playerWallets.set(currentUser,cur+10);updateCurrencyDisplay();showFloatingText('+10🪙');}}},1000);
+setInterval(()=>{if(!gameActive||!ws)return;const me=gameState.players?.find(p=>p.id===myId);if(!me)return;let dx=0,dy=0;if(keys['w'])dy--;if(keys['s'])dy++;if(keys['a'])dx--;if(keys['d'])dx++;if(dx||dy){const l=Math.sqrt(dx*dx+dy*dy);ws.send(JSON.stringify({type:'move',x:Math.max(15,Math.min(canvas.width-15,me.x+dx/l*5)),y:Math.max(15,Math.min(canvas.height-15,me.y+dy/l*5))}));}document.getElementById('playerHpFill').style.width=Math.max(0,(me.hp/me.maxHp)*100)+'%';document.getElementById('killCount').textContent=me.kills||0;if(me.hp<=0)document.getElementById('deadOverlay').classList.add('show');},1000/60);
 
 function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#1d0000';ctx.fillRect(0,0,canvas.width,canvas.height);if(gameState.enemies)gameState.enemies.forEach(e=>{ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fillStyle=e.hp>0?'#8b0000':'#333';ctx.fill();});if(gameState.players)gameState.players.forEach(p=>{if(p.hp<=0)return;ctx.beginPath();ctx.arc(p.x,p.y,p.id===myId?14:11,0,Math.PI*2);ctx.fillStyle=p.color||'#ccc';ctx.fill();ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText(p.nickname||'',p.x,p.y-16);});requestAnimationFrame(draw);}
 draw();
@@ -299,10 +455,10 @@ draw();
 document.getElementById('respawnBtn').addEventListener('click',()=>document.getElementById('deadOverlay').classList.remove('show'));
 document.getElementById('backToMenuBtn').addEventListener('click',()=>{gameActive=!1;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
 document.getElementById('backToMenuFromDeath').addEventListener('click',()=>{gameActive=!1;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
-document.getElementById('userInfo').addEventListener('click',()=>{if(currentUser&&confirm('Выйти?')){usedNicknames.delete(currentUser.toLowerCase());currentUser=null;document.getElementById('userInfo').textContent='';document.getElementById('adminBtn').style.display='none';document.getElementById('adminPanel').style.display='none';if(ws)ws.close();showScreen('register');}});
-document.getElementById('nicknameInput').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('registerBtn').click();});
+document.getElementById('userInfo').addEventListener('click',()=>{if(currentUser&&confirm('Выйти?')){if(ws)ws.close();location.reload();}});
 
 updateSquares();renderHeroGrid();showScreen('register');
+connectWebSocket();
 </script>
 </body>
 </html>
