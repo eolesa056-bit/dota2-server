@@ -2,231 +2,473 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DOTA 2 Online</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Defense of the Ancients</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #0a0e17;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      font-family: Arial;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: radial-gradient(ellipse at center, #1a1f2e 0%, #0a0d14 100%);
       overflow: hidden;
+      touch-action: manipulation;
     }
-    canvas {
-      border: 2px solid #b89b4b;
-      border-radius: 10px;
-      background: #1d2b1a;
+    .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #121827 0%, #0a0f1a 100%); }
+    .top-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(180deg, #1b1e2a 0%, #0a0c14 100%);
+      padding: 8px 15px; border-bottom: 2px solid #b89b4b; flex-shrink: 0; flex-wrap: wrap; gap: 5px;
     }
-    .login {
-      position: absolute;
-      background: #1a1e2a;
-      padding: 30px;
-      border-radius: 15px;
-      border: 2px solid #d4af37;
-      text-align: center;
-      color: #d4af37;
-      z-index: 10;
+    .nav-btn {
+      background: linear-gradient(180deg, #3d3222 0%, #1f180e 100%);
+      border: 1px solid #7a6a4a; color: #e0c78b; font-weight: bold;
+      font-size: 0.75rem; padding: 8px 12px; border-radius: 6px; cursor: pointer;
+      text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; white-space: nowrap;
     }
-    input {
-      padding: 12px;
-      font-size: 16px;
-      margin: 10px;
-      border-radius: 8px;
-      border: 1px solid #b89b4b;
-      background: #0f131c;
-      color: #e0d7b0;
-      text-align: center;
+    .nav-btn:hover { color: #ffd966; border-color: #c9a03d; }
+    .nav-btn.active { background: #c9a03d; color: #000; border-color: #ffd700; }
+    .admin-btn { background: #4a0020; border-color: #ff4444; color: #ff8888; display: none; }
+    .user-info { color: #d4af37; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
+    .currency-display { color: #ffd700; font-weight: bold; font-size: 0.8rem; }
+    .main-content { flex: 1; overflow-y: auto; padding: 10px; }
+    .screen { display: none; height: 100%; }
+    .screen.active { display: flex; flex-direction: column; }
+    
+    .register-screen { justify-content: center; align-items: center; }
+    .register-title { font-size: 1.5rem; color: #d4af37; margin-bottom: 20px; text-align: center; }
+    .register-input {
+      background: #1a1e2a; border: 2px solid #b89b4b; color: #e0d7b0;
+      padding: 12px 20px; font-size: 1rem; border-radius: 12px; width: 90%; max-width: 280px;
+      text-align: center; margin-bottom: 15px; outline: none;
     }
-    button {
-      padding: 12px 35px;
-      font-size: 18px;
-      background: #d4af37;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      font-weight: bold;
+    .error-msg { color: #ff6b6b; margin-bottom: 10px; display: none; font-size: 0.85rem; }
+    .confirm-btn {
+      background: radial-gradient(circle at 30% 20%, #f0c45a, #aa7c2c);
+      border: none; color: #1f1407; font-weight: bold; font-size: 1.2rem;
+      padding: 12px 35px; border-radius: 40px; cursor: pointer; box-shadow: 0 4px 0 #6b4c1c; text-transform: uppercase;
     }
-    button:hover { background: #ffd700; }
-    .hud {
-      display: flex;
-      gap: 20px;
-      color: white;
-      margin-top: 10px;
-      font-weight: bold;
-      font-size: 16px;
+    
+    .attribute-tabs { display: flex; gap: 5px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
+    .attr-tab {
+      padding: 8px 12px; text-align: center; font-weight: bold; font-size: 0.8rem;
+      border-radius: 8px; cursor: pointer; border: 2px solid transparent;
+      background: #1a1e28; color: #9e9e9e; flex: 1; min-width: 80px;
     }
-    .hint {
-      color: #888;
-      margin-top: 8px;
-      font-size: 13px;
+    .attr-tab.strength { border-color: #b33e2c; color: #d4776a; }
+    .attr-tab.agility { border-color: #2e8b57; color: #6fcf97; }
+    .attr-tab.intelligence { border-color: #2a6fdb; color: #6da8f0; }
+    .attr-tab.active.strength { background: #3d1e1a; color: #ff9e8c; }
+    .attr-tab.active.agility { background: #1a3322; color: #8effb0; }
+    .attr-tab.active.intelligence { background: #15213d; color: #9bc3ff; }
+    
+    .hero-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; max-height: 40vh; overflow-y: auto; }
+    .hero-card {
+      background: #171c26; border-radius: 10px; padding: 10px 5px; text-align: center;
+      cursor: pointer; border: 2px solid #2f3540; transition: 0.2s;
     }
+    .hero-card:hover { border-color: #d4af37; transform: translateY(-2px); }
+    .hero-card.selected { border-color: #f0c45a; box-shadow: 0 0 15px #b8860b; background: #2a2f3c; }
+    .hero-avatar { font-size: 2rem; }
+    .hero-name { color: #e0d7b0; font-weight: bold; font-size: 0.7rem; }
+    
+    .hero-detail { display: none; background: #1a1f2e; border-radius: 10px; padding: 15px; margin-top: 15px; border: 1px solid #b89b4b; }
+    .hero-detail-content { display: flex; flex-direction: column; gap: 10px; }
+    @media (min-width: 768px) { .hero-detail-content { flex-direction: row; } }
+    .hero-detail-left, .hero-detail-center, .hero-detail-right { background: #0f131c; padding: 12px; border-radius: 8px; color: #c0b090; flex: 1; }
+    .hero-detail-center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .hero-model-large { font-size: 4rem; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    .skin-option {
+      background: #1a1e2a; padding: 8px; margin: 4px 0; border-radius: 6px;
+      cursor: pointer; border: 2px solid #2f3540; color: #c0b090;
+      display: flex; justify-content: space-between; font-size: 0.8rem; transition: 0.2s;
+    }
+    .skin-option:hover { border-color: #d4af37; }
+    .skin-option.selected { border-color: #ffd700; box-shadow: 0 0 10px #b8860b; }
+    .skin-option.locked { opacity: 0.5; cursor: not-allowed; }
+    .skin-price { background: #ffd700; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
+    
+    .play-game-btn {
+      display: block; margin: 15px auto; background: radial-gradient(circle at 30% 20%, #4CAF50, #2E7D32);
+      border: none; color: white; font-weight: bold; font-size: 1.1rem; padding: 12px 40px;
+      border-radius: 40px; cursor: pointer; width: 90%; max-width: 300px; box-shadow: 0 4px 0 #1B5E20;
+    }
+    
+    .party-container { display: flex; flex-direction: column; gap: 15px; }
+    @media (min-width: 768px) { .party-container { flex-direction: row; } }
+    .party-section, .friends-section, .lobby-section {
+      background: #1a1e2a; border-radius: 10px; padding: 15px; border: 1px solid #2a2a3a; flex: 1;
+    }
+    .section-title { color: #d4af37; font-weight: bold; margin-bottom: 10px; font-size: 1rem; }
+    .player-slot {
+      background: #252a38; border-radius: 6px; padding: 8px; margin: 3px 0;
+      color: #c0b090; border: 1px solid #2f3540; font-size: 0.8rem;
+    }
+    .player-slot.empty { opacity: 0.5; font-style: italic; }
+    .add-friend-input { background: #252a38; border: 1px solid #b89b4b; color: #e0d7b0; padding: 8px; border-radius: 6px; width: 100%; margin: 3px 0; font-size: 0.8rem; }
+    .small-btn { background: #c9a03d; border: none; color: #000; font-weight: bold; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.75rem; }
+    .lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 6px; background: #252a38; border-radius: 6px; margin: 2px 0; color: #c0b090; font-size: 0.8rem; }
+    .invite-btn { background: #4CAF50; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
+    
+    .finding-screen { justify-content: center; align-items: center; }
+    .finding-title { font-size: 1.3rem; color: #d4af37; margin-bottom: 15px; }
+    .squares-grid { display: flex; gap: 6px; margin: 15px 0; flex-wrap: wrap; justify-content: center; }
+    .player-square { width: 40px; height: 40px; background: #1a1e2a; border: 2px solid #3a3e4a; border-radius: 8px; }
+    .player-square.confirmed { background: #b8860b; border-color: #ffd700; box-shadow: 0 0 15px #ffd700; }
+    
+    .game-screen { position: relative; }
+    canvas { display: block; margin: 0 auto; border-radius: 8px; background: radial-gradient(circle at 20% 30%, #2d4a32, #1b2a1a); width: 100%; height: auto; }
+    .info-panel {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
+      color: #e0d7b0; font-weight: bold; background: linear-gradient(180deg, #3f3627 0%, #1f1a13 100%);
+      border-radius: 30px; padding: 8px 15px; border: 1px solid #b89b6b; font-size: 0.75rem; flex-wrap: wrap; gap: 5px;
+    }
+    .hp-bar { width: 100px; height: 10px; background: #2d1a1a; border-radius: 10px; overflow: hidden; }
+    .hp-fill { height: 100%; background: linear-gradient(90deg, #d43f3f, #ff6a4b); transition: 0.15s; }
+    .dead-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 20; }
+    .dead-overlay.show { display: flex; }
+    .respawn-btn { background: radial-gradient(circle at 30% 20%, #4a90d9, #2a5a8a); border: none; color: white; font-weight: bold; font-size: 1rem; padding: 10px 25px; border-radius: 30px; cursor: pointer; margin-top: 10px; }
+    
+    .admin-panel {
+      display: none; position: fixed; top: 5%; left: 5%; right: 5%; bottom: 5%;
+      background: linear-gradient(135deg, #1a0030, #0d001a); padding: 20px; border-radius: 15px;
+      border: 2px solid #ffd700; color: #ffd700; z-index: 9999; overflow-y: auto;
+      box-shadow: 0 0 60px rgba(255,215,0,0.4);
+    }
+    .admin-panel h3 { text-align: center; font-size: 1.2rem; text-shadow: 0 0 20px #ffd700; }
+    .admin-section { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin: 8px 0; border: 1px solid rgba(255,215,0,0.3); }
+    .admin-section h4 { color: #ffaa00; font-size: 0.85rem; margin-bottom: 5px; }
+    .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #ffd700; color: #ffd700; padding: 6px 8px; margin: 3px; border-radius: 5px; width: calc(100% - 20px); font-size: 0.8rem; }
+    .admin-btn-gold { background: linear-gradient(180deg, #ffd700, #b8860b); border: none; padding: 6px 12px; margin: 3px; border-radius: 5px; cursor: pointer; color: #000; font-weight: bold; font-size: 0.75rem; }
+    .close-admin-btn { position: absolute; top: 8px; right: 8px; background: #ff4444; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; }
+    
+    .mobile-controls { display: none; gap: 5px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+    .mobile-btn { background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); color: white; font-weight: bold; font-size: 1.2rem; width: 50px; height: 50px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; touch-action: manipulation; }
+    .mobile-btn:active { background: rgba(255,255,255,0.4); }
+    .attack-mobile-btn { background: rgba(255,0,0,0.4); border-color: rgba(255,0,0,0.6); width: 80px; font-size: 0.9rem; }
   </style>
 </head>
 <body>
-  <canvas id="game" width="1000" height="600"></canvas>
-  
-  <div class="login" id="loginScreen">
-    <h2>🎮 DOTA 2 ONLINE</h2>
-    <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="12"><br>
-    <button onclick="startGame()">⚡ В БИТВУ</button>
+<div class="app">
+  <div class="top-bar">
+    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+      <button class="nav-btn active" data-screen="heroes">👥 Герои</button>
+      <button class="nav-btn" data-screen="party">👥 Пати</button>
+      <button class="nav-btn" data-screen="finding">⚔️ Играть</button>
+      <button class="nav-btn" id="promoBtn">🎁</button>
+      <button class="nav-btn admin-btn" id="adminBtn">👑</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="currency-display">🪙<span id="currencyAmount">1000</span></span>
+      <div class="user-info" id="userInfo"></div>
+    </div>
   </div>
-  
-  <div class="hud">
-    <span id="myName">⚔️ Герой</span>
-    <span>❤️ <span id="myHp">100</span></span>
-    <span>🏆 <span id="myKills">0</span></span>
-    <span>👥 Игроков: <span id="playerCount">1</span></span>
-  </div>
-  <div class="hint">🎮 WASD - движение | ПРОБЕЛ - атака</div>
 
-  <script>
-    let ws;
-    let myId;
-    let gameState = { players: [], enemies: [] };
-    const canvas = document.getElementById('game');
-    const ctx = canvas.getContext('2d');
-    const keys = {};
-    
-    function startGame() {
-      const nickname = document.getElementById('nickInput').value.trim() || 'Игрок';
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('myName').textContent = '⚔️ ' + nickname;
-      
-      // Подключение к серверу
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const wsUrl = `${protocol}//${window.location.host}`;
-      
-      ws = new WebSocket(wsUrl);
-      
-      ws.onopen = () => {
-        ws.send(JSON.stringify({ type: 'nickname', nickname }));
-      };
-      
-      ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        
-        if (data.type === 'init') {
-          myId = data.playerId;
-        }
-        
-        if (data.type === 'update') {
-          gameState = data;
-          updateHUD();
-        }
-      };
-      
-      ws.onclose = () => {
-        alert('Соединение с сервером потеряно');
-      };
-    }
-    
-    function updateHUD() {
-      const me = gameState.players.find(p => p.id === myId);
-      if (me) {
-        document.getElementById('myHp').textContent = Math.floor(me.hp);
-        document.getElementById('myKills').textContent = me.kills;
-        document.getElementById('playerCount').textContent = gameState.players.length;
-      }
-    }
-    
-    // Управление
-    document.addEventListener('keydown', e => {
-      keys[e.key.toLowerCase()] = true;
-      if (e.key === ' ' && ws && ws.readyState === WebSocket.OPEN) {
-        ws.send(JSON.stringify({ type: 'attack' }));
-      }
-      e.preventDefault();
-    });
-    
-    document.addEventListener('keyup', e => {
-      keys[e.key.toLowerCase()] = false;
-    });
-    
-    function movePlayer() {
-      if (!ws || ws.readyState !== WebSocket.OPEN) return;
-      
-      const me = gameState.players.find(p => p.id === myId);
-      if (!me) return;
-      
-      let dx = 0, dy = 0;
-      if (keys['w']) dy -= 1;
-      if (keys['s']) dy += 1;
-      if (keys['a']) dx -= 1;
-      if (keys['d']) dx += 1;
-      
-      if (dx || dy) {
-        const len = Math.sqrt(dx*dx + dy*dy);
-        const speed = 5;
-        const newX = me.x + (dx/len) * speed;
-        const newY = me.y + (dy/len) * speed;
-        
-        ws.send(JSON.stringify({
-          type: 'move',
-          x: Math.max(20, Math.min(980, newX)),
-          y: Math.max(20, Math.min(580, newY))
-        }));
-      }
-    }
-    
-    function draw() {
-      ctx.clearRect(0, 0, 1000, 600);
-      
-      // Фон
-      ctx.fillStyle = '#1d2b1a';
-      ctx.fillRect(0, 0, 1000, 600);
-      
-      // Враги
-      gameState.enemies.forEach(enemy => {
-        ctx.beginPath();
-        ctx.arc(enemy.x, enemy.y, 12, 0, Math.PI * 2);
-        ctx.fillStyle = enemy.hp > 0 ? '#8b0000' : '#333';
-        ctx.fill();
-        ctx.strokeStyle = '#000';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        
-        if (enemy.hp > 0) {
-          ctx.fillStyle = '#ff0000';
-          ctx.fillRect(enemy.x - 10, enemy.y - 18, 20, 3);
-          ctx.fillStyle = '#00ff00';
-          ctx.fillRect(enemy.x - 10, enemy.y - 18, 20 * (enemy.hp/50), 3);
-        }
-      });
-      
-      // Игроки
-      gameState.players.forEach(player => {
-        if (player.hp <= 0) return;
-        
-        const isMe = player.id === myId;
-        
-        ctx.beginPath();
-        ctx.arc(player.x, player.y, isMe ? 17 : 14, 0, Math.PI * 2);
-        ctx.fillStyle = player.color;
-        ctx.fill();
-        ctx.strokeStyle = isMe ? '#fff' : '#000';
-        ctx.lineWidth = isMe ? 3 : 2;
-        ctx.stroke();
-        
-        // Никнейм
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(player.nickname, player.x, player.y - 22);
-      });
-    }
-    
-    setInterval(movePlayer, 1000/60);
-    
-    function gameLoop() {
-      draw();
-      requestAnimationFrame(gameLoop);
-    }
-    
-    gameLoop();
-  </script>
+  <div class="main-content">
+    <div class="screen register-screen active" id="registerScreen">
+      <div class="register-title">👤 ВВЕДИТЕ НИКНЕЙМ</div>
+      <input type="text" class="register-input" id="nicknameInput" placeholder="Ваш никнейм" maxlength="15" autocomplete="off">
+      <div class="error-msg" id="errorMsg"></div>
+      <button class="confirm-btn" id="registerBtn">✅ ПРОДОЛЖИТЬ</button>
+    </div>
+
+    <div class="screen" id="heroesScreen">
+      <h2 style="color:#d4af37;text-align:center;margin-bottom:10px;font-size:1.1rem;">ВЫБЕРИТЕ ГЕРОЯ</h2>
+      <div class="attribute-tabs">
+        <div class="attr-tab strength active" data-attr="strength">💪 Сила</div>
+        <div class="attr-tab agility" data-attr="agility">🏹 Ловкость</div>
+        <div class="attr-tab intelligence" data-attr="intelligence">📖 Интеллект</div>
+      </div>
+      <div class="hero-grid" id="heroGrid"></div>
+      <div class="hero-detail" id="heroDetail">
+        <div class="hero-detail-content">
+          <div class="hero-detail-left" id="heroDesc"></div>
+          <div class="hero-detail-center" id="heroModel"></div>
+          <div class="hero-detail-right" id="heroSkins"></div>
+        </div>
+      </div>
+      <button class="play-game-btn" id="startGameBtn">⚡ НАЧАТЬ ИГРУ</button>
+    </div>
+
+    <div class="screen" id="partyScreen">
+      <h2 style="color:#d4af37;text-align:center;margin-bottom:15px;font-size:1.1rem;">👥 ПАТИ И ДРУЗЬЯ</h2>
+      <div class="party-container">
+        <div>
+          <div class="party-section">
+            <div class="section-title">👥 Моя пати (<span id="partyCount">1</span>/5)</div>
+            <div id="partySlots">
+              <div class="player-slot" id="partySlot0">Вы (лидер)</div>
+              <div class="player-slot empty" id="partySlot1">Пустой слот</div>
+              <div class="player-slot empty" id="partySlot2">Пустой слот</div>
+              <div class="player-slot empty" id="partySlot3">Пустой слот</div>
+              <div class="player-slot empty" id="partySlot4">Пустой слот</div>
+            </div>
+            <button class="small-btn" style="width:100%;margin-top:8px;" onclick="leaveParty()">Покинуть пати</button>
+          </div>
+          <div class="friends-section" style="margin-top:10px;">
+            <div class="section-title">👫 Друзья</div>
+            <input type="text" class="add-friend-input" id="addFriendInput" placeholder="Никнейм друга...">
+            <button class="small-btn" style="width:100%;" onclick="addFriend()">Добавить друга</button>
+            <div id="friendsList" style="margin-top:10px;"></div>
+          </div>
+        </div>
+        <div>
+          <div class="lobby-section">
+            <div class="section-title">🌍 Лобби (онлайн: <span id="onlineCount">0</span>)</div>
+            <div style="max-height:300px;overflow-y:auto;" id="lobbyPlayers"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen finding-screen" id="findingScreen">
+      <div class="finding-title">🔍 ПОИСК ИГРЫ...</div>
+      <div class="squares-grid" id="squaresGrid"></div>
+      <button class="confirm-btn" id="confirmSearchBtn">✅ ПОДТВЕРДИТЬ</button>
+      <p style="color:#a0977a;margin-top:10px;font-size:0.85rem;" id="confirmStatus">0/10 игроков подтвердили</p>
+      <button class="nav-btn" style="margin-top:10px;" id="cancelSearchBtn">↩️ Отмена</button>
+    </div>
+
+    <div class="screen game-screen" id="gameScreen">
+      <canvas id="gameCanvas"></canvas>
+      <div class="dead-overlay" id="deadOverlay">
+        <div style="color:#d4af37;font-size:1.5rem;font-weight:bold;">💀 ВЫ ПАЛИ 💀</div>
+        <button class="respawn-btn" id="respawnBtn">🔄 ВОЗРОДИТЬСЯ</button>
+        <button class="nav-btn" style="margin-top:8px;" id="backToMenuFromDeath">↩️ В МЕНЮ</button>
+      </div>
+      <div class="info-panel">
+        <span id="heroDisplayName">⚔️ Герой</span>
+        <div class="hp-bar"><div id="playerHpFill" class="hp-fill" style="width:100%;"></div></div>
+        <span>🏆 <span id="killCount">0</span></span>
+        <button class="nav-btn" id="backToMenuBtn">↩️ Меню</button>
+      </div>
+      <div class="mobile-controls" id="mobileControls">
+        <div style="display:grid;grid-template-areas:'.. up ..' 'left .. right' '.. down ..';gap:3px;">
+          <button class="mobile-btn" style="grid-area:up;" id="btnUp">▲</button>
+          <button class="mobile-btn" style="grid-area:left;" id="btnLeft">◄</button>
+          <button class="mobile-btn" style="grid-area:right;" id="btnRight">►</button>
+          <button class="mobile-btn" style="grid-area:down;" id="btnDown">▼</button>
+        </div>
+        <button class="mobile-btn attack-mobile-btn" id="btnAttack">⚔️ АТАКА</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="admin-panel" id="adminPanel">
+  <button class="close-admin-btn" onclick="closeAdminPanel()">✕</button>
+  <h3>👑 Админ-панель</h3>
+  <div class="admin-section">
+    <h4>🎫 Создать промокод</h4>
+    <input type="text" class="admin-input" id="promoCodeInput" placeholder="Код">
+    <input type="number" class="admin-input" id="promoAmountInput" placeholder="Сумма">
+    <button class="admin-btn-gold" onclick="createPromoCode()">Создать</button>
+  </div>
+  <div class="admin-section">
+    <h4>🚫 Бан/Разбан</h4>
+    <input type="text" class="admin-input" id="banNicknameInput" placeholder="Никнейм">
+    <button class="admin-btn-gold" onclick="banPlayer()">Забанить</button>
+    <button class="admin-btn-gold" onclick="unbanPlayer()">Разбанить</button>
+  </div>
+  <div class="admin-section">
+    <h4>🪙 Выдать валюту</h4>
+    <input type="text" class="admin-input" id="giveCurrencyNickname" placeholder="Никнейм">
+    <input type="number" class="admin-input" id="giveCurrencyAmount" placeholder="Сумма">
+    <button class="admin-btn-gold" onclick="giveCurrency()">Выдать</button>
+  </div>
+  <div class="admin-section">
+    <h4>👥 Игроки онлайн</h4>
+    <div id="playerList" style="max-height:150px;overflow-y:auto;font-size:0.8rem;"></div>
+  </div>
+</div>
+
+<script>
+// ========== ПОЛНЫЙ КОД ИГРЫ ==========
+const isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+if (isMobile) document.getElementById('mobileControls').style.display = 'flex';
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() { canvas.width = Math.min(window.innerWidth-20, 1000); canvas.height = Math.min(window.innerHeight-250, 500); }
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+let currentUser = null, currentAttr = 'strength', selectedHeroId = 'axe', selectedSkin = 0;
+let ws = null, myId = null, gameState = { players: [], enemies: [] }, gameActive = false;
+let confirmedPlayers = 0, playerWallets = new Map(), playerSkins = new Map(), friendsList = new Map(), partyMembers = [];
+const totalPlayers = 10, adminAccounts = new Set(['admin', 'root', 'moderator']), promoCodes = new Map(), bannedPlayers = new Set(), usedNicknames = new Set();
+
+function drawHero(ctx, heroId, skin, x, y, s=1) {
+  ctx.save(); ctx.translate(x,y); ctx.scale(s,s);
+  const colors = {
+    axe: [['#c1440e','#ffcc80','#f00','#999'],['#2a5a8c','#aaccff','#4a90d9','#ff0'],['#ff8c00','#ffdd88','#ffd700','#f44']],
+    pudge: [['#5d7a3a','#ffaa77','#8B0000'],['#6b8e23','#ffcc88','#f00'],['#daa520','#ffdd99','#ffd700']],
+    sven: [['#3a5a8c','#ccc','#ddd'],['#5a3a8c','#ddaadd','#eec'],['#8c8c3a','#ffdd88','#fe8']],
+    antimage: [['#5a208a','#dda0dd','#0ce'],['#7a40aa','#eec','#8ff'],['#2a2a2a','#888','#f44']],
+    sniper: [['#2d6a2d','#ffe4b5','#666'],['#4a8a4a','#fdb','#888'],['#8a2d2d','#fca','#f44']],
+    shadowfiend: [['#1a001a','#2a002a','#f50'],['#2d002d','#4a004a','#f60'],['#4a004a','#6a006a','#f80']],
+    lina: [['#e84420','#ffe4b5','#ffd700'],['#ff5530','#fed','#fa0'],['#ff6640','#fff','#fc0']]
+  };
+  const c = colors[heroId] ? (colors[heroId][skin] || colors[heroId][0]) : ['#808080','#ffccaa','#000'];
+  ctx.fillStyle = c[0]; ctx.fillRect(-14,-8,28,24);
+  ctx.fillStyle = c[1]; ctx.beginPath(); ctx.arc(0,-12,8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = c[2]; ctx.fillRect(12,-4,14,3);
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(-3,-13,1.5,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(3,-13,1.5,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+const heroes = {
+  strength: [
+    { id: 'axe', name: 'Axe', avatar: '🪓', hp: 130, dmg: 38, speed: 2.8, desc: 'Могучий воин с топором. Врывается в гущу битвы и крушит врагов.', skins: [{name:'Кровавый воин',price:0},{name:'Громовой берсерк',price:500},{name:'Огненный разрушитель',price:1000}] },
+    { id: 'pudge', name: 'Pudge', avatar: '🪝', hp: 150, dmg: 42, speed: 2.4, desc: 'Толстый мясник с крюком. Затаскивает врагов и разрывает их.', skins: [{name:'Деревенский мясник',price:0},{name:'Мясник-убийца',price:500},{name:'Золотой повар',price:1000}] },
+    { id: 'sven', name: 'Sven', avatar: '⚔️', hp: 120, dmg: 45, speed: 3.0, desc: 'Странствующий рыцарь с огромным мечом.', skins: [{name:'Стальной рыцарь',price:0},{name:'Мистический воин',price:500},{name:'Королевский страж',price:1000}] }
+  ],
+  agility: [
+    { id: 'antimage', name: 'Anti-Mage', avatar: '🌀', hp: 100, dmg: 34, speed: 4.0, desc: 'Охотник на магов. Быстрый и смертоносный.', skins: [{name:'Магический убийца',price:0},{name:'Лунный охотник',price:500},{name:'Теневой странник',price:1000}] },
+    { id: 'sniper', name: 'Sniper', avatar: '🎯', hp: 85, dmg: 40, speed: 3.2, desc: 'Меткий стрелок. Уничтожает врагов на расстоянии.', skins: [{name:'Снайпер-ветеран',price:0},{name:'Арбалетчик',price:500},{name:'Взрывной стрелок',price:1000}] },
+    { id: 'shadowfiend', name: 'Shadow Fiend', avatar: '👻', hp: 100, dmg: 50, speed: 3.5, desc: 'Тёмный лорд. Собирает души и выпускает тьму.', skins: [{name:'Тёмный властелин',price:0},{name:'Повелитель душ',price:500},{name:'Архидемон',price:1000}] }
+  ],
+  intelligence: [
+    { id: 'lina', name: 'Lina', avatar: '🔥', hp: 95, dmg: 44, speed: 3.1, desc: 'Огненная волшебница. Мощные заклинания огня.', skins: [{name:'Пламя дракона',price:0},{name:'Вулканическая жрица',price:500},{name:'Метеоритная ведьма',price:1000}] }
+  ]
+};
+
+function getWallet(n) { if(!playerWallets.has(n)) playerWallets.set(n,1000); return playerWallets.get(n); }
+function getPurchasedSkins(u) { if(!playerSkins.has(u)) playerSkins.set(u,{}); return playerSkins.get(u); }
+function isSkinPurchased(u,h,i) { if(i===0) return true; const s=getPurchasedSkins(u); return s[h]&&s[h].includes(i); }
+function purchaseSkin(u,h,i) { const s=getPurchasedSkins(u); if(!s[h]) s[h]=[0]; if(!s[h].includes(i)) s[h].push(i); playerSkins.set(u,s); }
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.remove('active'));
+  const map={register:'registerScreen',heroes:'heroesScreen',party:'partyScreen',finding:'findingScreen',game:'gameScreen'};
+  if(map[name]) document.getElementById(map[name]).classList.add('active');
+  const btn=document.querySelector(`.nav-btn[data-screen="${name}"]`);
+  if(btn) btn.classList.add('active');
+}
+
+document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(!currentUser&&btn.dataset.screen!=='register'){showScreen('register');return;}
+    if(btn.dataset.screen==='finding'){confirmedPlayers=0;updateSquares();}
+    showScreen(btn.dataset.screen);
+  });
+});
+
+document.getElementById('registerBtn').addEventListener('click',()=>{
+  const nickname=document.getElementById('nicknameInput').value.trim();
+  if(!nickname){document.getElementById('errorMsg').textContent='Введите ник!';document.getElementById('errorMsg').style.display='block';return;}
+  if(bannedPlayers.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='Вы забанены!';document.getElementById('errorMsg').style.display='block';return;}
+  if(usedNicknames.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='Ник занят!';document.getElementById('errorMsg').style.display='block';return;}
+  usedNicknames.add(nickname.toLowerCase());
+  currentUser=nickname;
+  document.getElementById('userInfo').textContent='👤 '+nickname;
+  if(adminAccounts.has(nickname.toLowerCase())){document.getElementById('adminBtn').style.display='inline-block';document.getElementById('userInfo').textContent+=' 👑';}
+  document.getElementById('errorMsg').style.display='none';
+  document.getElementById('nicknameInput').value='';
+  updateCurrencyDisplay();
+  updateLobby();
+  const protocol=window.location.protocol==='https:'?'wss:':'ws:';
+  ws=new WebSocket(`${protocol}//${window.location.host}`);
+  ws.onopen=()=>{ws.send(JSON.stringify({type:'nickname',nickname}));ws.send(JSON.stringify({type:'heroSelect',heroId:selectedHeroId,skinIndex:selectedSkin}));};
+  ws.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.type==='init')myId=d.playerId;if(d.type==='update')gameState=d;};
+  showScreen('heroes');renderHeroGrid();
+});
+
+function updateCurrencyDisplay(){if(currentUser)document.getElementById('currencyAmount').textContent=getWallet(currentUser);}
+
+function renderHeroGrid(){
+  const grid=document.getElementById('heroGrid');grid.innerHTML='';
+  heroes[currentAttr].forEach(h=>{
+    const card=document.createElement('div');
+    card.className=`hero-card ${h.id===selectedHeroId?'selected':''}`;
+    card.innerHTML=`<div class="hero-avatar">${h.avatar}</div><div class="hero-name">${h.name}</div>`;
+    card.onclick=()=>{selectedHeroId=h.id;if(currentUser){const s=getPurchasedSkins(currentUser);selectedSkin=(s[h.id]&&s[h.id][0])||0;}renderHeroGrid();showHeroDetail(h.id);};
+    grid.appendChild(card);
+  });
+}
+
+function showHeroDetail(heroId){
+  const hero=Object.values(heroes).flat().find(h=>h.id===heroId);if(!hero)return;
+  document.getElementById('heroDesc').innerHTML=`<h3 style="color:#d4af37;">${hero.name}</h3><p style="margin:8px 0;">${hero.desc}</p><p>❤️ ${hero.hp} | ⚔️ ${hero.dmg} | 🏃 ${hero.speed}</p>`;
+  const lc=document.createElement('canvas');lc.width=150;lc.height=150;const lctx=lc.getContext('2d');drawHero(lctx,heroId,selectedSkin,75,75,3);
+  document.getElementById('heroModel').innerHTML='';document.getElementById('heroModel').appendChild(lc);
+  document.getElementById('heroModel').innerHTML+=`<p style="color:#d4af37;margin-top:8px;">${hero.name}</p>`;
+  const wallet=currentUser?getWallet(currentUser):0;
+  document.getElementById('heroSkins').innerHTML='<h4 style="color:#d4af37;margin-bottom:8px;">Скины</h4>'+hero.skins.map((s,i)=>{
+    const purchased=isSkinPurchased(currentUser,heroId,i);
+    return `<div class="skin-option ${i===selectedSkin?'selected':''} ${!purchased&&i>0?'locked':''}" onclick="${purchased?`selectSkin('${heroId}',${i})`:i>0?`buySkin('${heroId}',${i},${s.price})`:`selectSkin('${heroId}',0)`}"><span>${s.name}</span>${i>0&&!purchased?`<span class="skin-price">${s.price}🪙</span>`:i>0?'<span style="color:#4CAF50;">✓</span>':'<span class="skin-price">Бесплатно</span>'}</div>`;
+  }).join('');
+  document.getElementById('heroDetail').style.display='block';
+}
+
+window.selectSkin=function(hId,idx){selectedSkin=idx;if(currentUser){const s=getPurchasedSkins(currentUser);if(!s[hId])s[hId]=[0];s[hId]=s[hId].filter(x=>x!==idx);s[hId].unshift(idx);playerSkins.set(currentUser,s);}renderHeroGrid();showHeroDetail(hId);};
+window.buySkin=function(hId,idx,price){if(!currentUser)return;if(getWallet(currentUser)>=price){playerWallets.set(currentUser,getWallet(currentUser)-price);purchaseSkin(currentUser,hId,idx);selectedSkin=idx;updateCurrencyDisplay();renderHeroGrid();showHeroDetail(hId);alert('Скин куплен!');}else alert('Недостаточно монет!');};
+
+document.querySelectorAll('.attr-tab').forEach(tab=>{tab.addEventListener('click',()=>{currentAttr=tab.dataset.attr;document.querySelectorAll('.attr-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');selectedHeroId=heroes[currentAttr][0].id;selectedSkin=0;renderHeroGrid();});});
+
+function updateSquares(){const g=document.getElementById('squaresGrid');g.innerHTML='';for(let i=0;i<totalPlayers;i++){const s=document.createElement('div');s.className=`player-square ${i<confirmedPlayers?'confirmed':''}`;g.appendChild(s);}document.getElementById('confirmStatus').textContent=`${confirmedPlayers}/${totalPlayers}`;}
+document.getElementById('confirmSearchBtn').addEventListener('click',()=>{if(confirmedPlayers<totalPlayers){confirmedPlayers++;updateSquares();if(confirmedPlayers>=totalPlayers)setTimeout(()=>showScreen('heroes'),600);}});
+document.getElementById('cancelSearchBtn').addEventListener('click',()=>showScreen('heroes'));
+
+document.getElementById('startGameBtn').addEventListener('click',()=>{gameActive=true;showScreen('game');const hero=Object.values(heroes).flat().find(h=>h.id===selectedHeroId);document.getElementById('heroDisplayName').textContent=`${hero.avatar} ${hero.name}`;resizeCanvas();});
+
+// Пати и друзья
+function updatePartyDisplay(){for(let i=0;i<5;i++){const slot=document.getElementById(`partySlot${i}`);if(i===0){slot.innerHTML=currentUser?`${currentUser} (лидер)`:'Вы (лидер)';slot.className='player-slot';}else if(partyMembers[i-1]){slot.innerHTML=partyMembers[i-1];slot.className='player-slot';}else{slot.innerHTML='Пустой слот';slot.className='player-slot empty';}}document.getElementById('partyCount').textContent=1+partyMembers.length;}
+window.addFriend=function(){if(!currentUser)return;const f=document.getElementById('addFriendInput').value.trim().toLowerCase();if(!f||!usedNicknames.has(f))return alert('Игрок не найден!');if(!friendsList.has(currentUser))friendsList.set(currentUser,[]);const fl=friendsList.get(currentUser);if(!fl.includes(f)){fl.push(f);friendsList.set(currentUser,fl);updateFriendsList();document.getElementById('addFriendInput').value='';}};
+window.inviteToParty=function(n){if(partyMembers.length>=4)return alert('Пати заполнена!');if(!partyMembers.includes(n)){partyMembers.push(n);updatePartyDisplay();}};
+window.leaveParty=function(){partyMembers=[];updatePartyDisplay();};
+function updateFriendsList(){const c=document.getElementById('friendsList');if(!currentUser){c.innerHTML='';return;}const f=friendsList.get(currentUser)||[];c.innerHTML=f.map(x=>`<div class="lobby-player"><span>👤 ${x}</span><button class="invite-btn" onclick="inviteToParty('${x}')">Пригласить</button></div>`).join('');}
+function updateLobby(){const c=document.getElementById('lobbyPlayers');const all=Array.from(usedNicknames);document.getElementById('onlineCount').textContent=all.length;c.innerHTML=all.map(n=>`<div class="lobby-player"><span>👤 ${n}</span><button class="invite-btn" onclick="inviteToParty('${n}')">Пригласить</button></div>`).join('');}
+
+// Админка
+window.createPromoCode=function(){const c=document.getElementById('promoCodeInput').value.trim();const a=parseInt(document.getElementById('promoAmountInput').value);if(c&&a>0){promoCodes.set(c.toUpperCase(),a);alert(`Промокод ${c.toUpperCase()} создан на ${a}🪙`);}};
+window.banPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(n&&usedNicknames.has(n)){bannedPlayers.add(n);alert(`Игрок ${n} забанен`);updatePlayerList();}};
+window.unbanPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(n){bannedPlayers.delete(n);alert(`Игрок ${n} разбанен`);updatePlayerList();}};
+window.giveCurrency=function(){const n=document.getElementById('giveCurrencyNickname').value.trim().toLowerCase();const a=parseInt(document.getElementById('giveCurrencyAmount').value);if(n&&a>0){playerWallets.set(n,getWallet(n)+a);alert(`Выдано ${a}🪙 игроку ${n}`);updatePlayerList();}};
+window.closeAdminPanel=function(){document.getElementById('adminPanel').style.display='none';};
+function updatePlayerList(){const l=document.getElementById('playerList');if(l)l.innerHTML=Array.from(usedNicknames).map(n=>`<div style="padding:4px 0;display:flex;justify-content:space-between;"><span>👤 ${n}</span><span>${getWallet(n)}🪙 ${bannedPlayers.has(n)?'🚫':''}</span></div>`).join('');}
+
+document.getElementById('adminBtn').addEventListener('click',()=>{document.getElementById('adminPanel').style.display='block';updatePlayerList();});
+document.getElementById('promoBtn').addEventListener('click',()=>{if(!currentUser)return;const c=prompt('Введите промокод:');if(c&&promoCodes.has(c.toUpperCase())){const a=promoCodes.get(c.toUpperCase());playerWallets.set(currentUser,getWallet(currentUser)+a);promoCodes.delete(c.toUpperCase());alert(`+${a}🪙!`);updateCurrencyDisplay();}else alert('Неверный код');});
+
+// Управление
+const keys={};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;keys[e.key.toLowerCase()]=true;if(e.key===' '&&gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));e.preventDefault();});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+function setupMB(id,k){const b=document.getElementById(id);if(!b)return;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;});b.addEventListener('pointerup',e=>{keys[k]=false;});b.addEventListener('pointerleave',e=>{keys[k]=false;});}
+setupMB('btnUp','w');setupMB('btnDown','s');setupMB('btnLeft','a');setupMB('btnRight','d');
+document.getElementById('btnAttack')?.addEventListener('pointerdown',e=>{e.preventDefault();if(gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));});
+
+// Игра
+setInterval(()=>{
+  if(!gameActive||!ws||ws.readyState!==WebSocket.OPEN)return;
+  const me=gameState.players?.find(p=>p.id===myId);if(!me)return;
+  let dx=0,dy=0;
+  if(keys['w']||keys['arrowup'])dy--;if(keys['s']||keys['arrowdown'])dy++;if(keys['a']||keys['arrowleft'])dx--;if(keys['d']||keys['arrowright'])dx++;
+  if(dx||dy){const l=Math.sqrt(dx*dx+dy*dy);ws.send(JSON.stringify({type:'move',x:Math.max(15,Math.min(canvas.width-15,me.x+dx/l*5)),y:Math.max(15,Math.min(canvas.height-15,me.y+dy/l*5))}));}
+  document.getElementById('playerHpFill').style.width=Math.max(0,(me.hp/me.maxHp)*100)+'%';
+  document.getElementById('killCount').textContent=me.kills||0;
+  if(me.hp<=0)document.getElementById('deadOverlay').classList.add('show');
+},1000/60);
+
+function draw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#1d2b1a';ctx.fillRect(0,0,canvas.width,canvas.height);
+  if(gameState.enemies)gameState.enemies.forEach(e=>{ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fillStyle=e.hp>0?'#8b0000':'#333';ctx.fill();});
+  if(gameState.players)gameState.players.forEach(p=>{if(p.hp<=0)return;ctx.beginPath();ctx.arc(p.x,p.y,p.id===myId?14:11,0,Math.PI*2);ctx.fillStyle=p.color||'#ccc';ctx.fill();ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText(p.nickname||'',p.x,p.y-16);});
+  requestAnimationFrame(draw);
+}
+draw();
+
+document.getElementById('respawnBtn').addEventListener('click',()=>document.getElementById('deadOverlay').classList.remove('show'));
+document.getElementById('backToMenuBtn').addEventListener('click',()=>{gameActive=false;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
+document.getElementById('backToMenuFromDeath').addEventListener('click',()=>{gameActive=false;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
+document.getElementById('userInfo').addEventListener('click',()=>{if(currentUser&&confirm('Выйти?')){usedNicknames.delete(currentUser.toLowerCase());currentUser=null;document.getElementById('userInfo').textContent='';document.getElementById('adminBtn').style.display='none';document.getElementById('adminPanel').style.display='none';if(ws)ws.close();showScreen('register');}});
+document.getElementById('nicknameInput').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('registerBtn').click();});
+
+updateSquares();renderHeroGrid();showScreen('register');
+</script>
 </body>
 </html>
