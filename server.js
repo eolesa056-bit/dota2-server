@@ -15,7 +15,7 @@ const playerSkins = new Map();
 const playerHeroes = new Map();
 const friendsList = new Map();
 const partyMembers = new Map();
-const usedNicknames = new Set();
+const usedNicknames = new Map(); // ник -> id
 
 for (let i = 0; i < 15; i++) {
   enemies.push({ id: i, x: Math.random() * 1000, y: Math.random() * 600, hp: 60, maxHp: 60 });
@@ -30,7 +30,9 @@ function readBody(req) {
   return new Promise((resolve) => {
     let body = '';
     req.on('data', chunk => body += chunk);
-    req.on('end', () => resolve(JSON.parse(body)));
+    req.on('end', () => {
+      try { resolve(JSON.parse(body)); } catch(e) { resolve({}); }
+    });
   });
 }
 
@@ -40,6 +42,7 @@ const server = http.createServer(async (req, res) => {
   
   if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
   
+  // Главная страница
   if (req.method === 'GET' && req.url === '/') {
     const filePath = path.join(__dirname, 'index.html');
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -50,6 +53,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Регистрация
   if (req.method === 'POST' && req.url === '/join') {
     const data = await readBody(req);
     const nickname = data.nickname.toLowerCase();
@@ -57,7 +61,8 @@ const server = http.createServer(async (req, res) => {
     if (bannedPlayers.has(nickname)) { sendJSON(res, { error: '⛔ Вы забанены!' }); return; }
     if (usedNicknames.has(nickname)) { sendJSON(res, { error: 'Ник занят!' }); return; }
     
-    usedNicknames.add(nickname);
+    const playerId = Date.now().toString();
+    usedNicknames.set(nickname, playerId);
     if (!playerWallets.has(nickname)) playerWallets.set(nickname, 0);
     if (!playerBP.has(nickname)) playerBP.set(nickname, { type: 'free', level: 1, xp: 0 });
     if (!playerSkins.has(nickname)) playerSkins.set(nickname, {});
@@ -66,7 +71,7 @@ const server = http.createServer(async (req, res) => {
     if (!partyMembers.has(nickname)) partyMembers.set(nickname, [nickname]);
     
     const player = {
-      id: Date.now().toString(),
+      id: playerId,
       nickname: nickname,
       x: Math.random() * 800 + 100,
       y: Math.random() * 400 + 100,
@@ -81,7 +86,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // Состояние игры (с проверкой бана)
   if (req.method === 'GET' && req.url === '/state') {
+    // ❗ Проверяем баны и удаляем забаненных
+    players = players.filter(p => {
+      if (bannedPlayers.has(p.nickname)) {
+        usedNicknames.delete(p.nickname);
+        return false;
+      }
+      return true;
+    });
+    
     players.forEach(player => {
       if (player.hp <= 0) return;
       enemies.forEach(enemy => {
@@ -91,7 +106,16 @@ const server = http.createServer(async (req, res) => {
         if (dist < 30) player.hp -= 0.3;
       });
     });
+    
     sendJSON(res, { players, enemies: enemies.filter(e => e.hp > 0) });
+    return;
+  }
+
+  // Проверка бана для конкретного игрока
+  if (req.method === 'POST' && req.url === '/checkBan') {
+    const data = await readBody(req);
+    const isBanned = bannedPlayers.has(data.nickname.toLowerCase());
+    sendJSON(res, { banned: isBanned });
     return;
   }
 
@@ -154,10 +178,11 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/ban') {
     const data = await readBody(req);
     if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
-    bannedPlayers.add(data.target.toLowerCase());
-    players = players.filter(p => p.nickname !== data.target.toLowerCase());
-    usedNicknames.delete(data.target.toLowerCase());
-    sendJSON(res, { success: true, target: data.target });
+    const target = data.target.toLowerCase();
+    bannedPlayers.add(target);
+    players = players.filter(p => p.nickname !== target);
+    usedNicknames.delete(target);
+    sendJSON(res, { success: true, target });
     return;
   }
 
@@ -165,11 +190,10 @@ const server = http.createServer(async (req, res) => {
     const data = await readBody(req);
     if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
     bannedPlayers.delete(data.target.toLowerCase());
-    sendJSON(res, { success: true, target: data.target });
+    sendJSON(res, { success: true });
     return;
   }
 
-  // СБРОС ROOT
   if (req.method === 'POST' && req.url === '/resetRoot') {
     usedNicknames.delete('root');
     players = players.filter(p => p.nickname !== 'root');
