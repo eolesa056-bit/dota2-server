@@ -4,112 +4,286 @@ const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 
+// ========== ДАННЫЕ ==========
 let players = [];
 let enemies = [];
+const promoCodes = new Map([['DOTA100', 100], ['DOTA500', 500], ['DOTA1000', 1000]]);
+const bpPromoCodes = new Map([['BPFREE', 'premium'], ['BPPLUS', 'plus']]);
+const bannedPlayers = new Set();
+const playerWallets = new Map();
+const playerBP = new Map();
+const playerSkins = new Map();
+const playerHeroes = new Map();
+const friendsList = new Map();
+const partyMembers = new Map();
+const usedNicknames = new Set();
 
-// Создаём врагов
+// Враги
 for (let i = 0; i < 15; i++) {
-  enemies.push({ id: i, x: Math.random() * 1000, y: Math.random() * 600, hp: 60 });
+  enemies.push({ id: i, x: Math.random() * 1000, y: Math.random() * 600, hp: 60, maxHp: 60 });
 }
 
-const server = http.createServer((req, res) => {
-  // CORS
+function sendJSON(res, data) {
+  res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+  res.end(JSON.stringify(data));
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', () => resolve(JSON.parse(body)));
+  });
+}
+
+const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200);
-    res.end();
-    return;
-  }
+  if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
   
   // Главная страница
   if (req.method === 'GET' && req.url === '/') {
     const filePath = path.join(__dirname, 'index.html');
     fs.readFile(filePath, 'utf8', (err, data) => {
-      if (err) {
-        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-        res.end('<h1>Сервер работает!</h1><p>Откройте игру</p>');
-        return;
-      }
+      if (err) { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end('<h1>Сервер работает!</h1>'); return; }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       res.end(data);
     });
     return;
   }
-  
-  // Регистрация игрока
+
+  // Регистрация
   if (req.method === 'POST' && req.url === '/join') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', () => {
-      const data = JSON.parse(body);
-      const player = {
-        id: Date.now().toString(),
-        nickname: data.nickname || 'Игрок',
-        x: Math.random() * 800 + 100,
-        y: Math.random() * 400 + 100,
-        hp: 100, maxHp: 100, kills: 0
-      };
-      players.push(player);
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true, player: player }));
+    const data = await readBody(req);
+    const nickname = data.nickname.toLowerCase();
+    
+    if (bannedPlayers.has(nickname)) { sendJSON(res, { error: '⛔ Вы забанены!' }); return; }
+    if (usedNicknames.has(nickname)) { sendJSON(res, { error: 'Ник занят!' }); return; }
+    
+    usedNicknames.add(nickname);
+    if (!playerWallets.has(nickname)) playerWallets.set(nickname, 0);
+    if (!playerBP.has(nickname)) playerBP.set(nickname, { type: 'free', level: 1, xp: 0 });
+    if (!playerSkins.has(nickname)) playerSkins.set(nickname, {});
+    if (!playerHeroes.has(nickname)) playerHeroes.set(nickname, { heroId: 'axe', skinIndex: 0 });
+    if (!friendsList.has(nickname)) friendsList.set(nickname, []);
+    if (!partyMembers.has(nickname)) partyMembers.set(nickname, [nickname]);
+    
+    const player = {
+      id: Date.now().toString(),
+      nickname: nickname,
+      x: Math.random() * 800 + 100,
+      y: Math.random() * 400 + 100,
+      hp: 100, maxHp: 100, kills: 0,
+      color: `hsl(${Math.random() * 360}, 70%, 50%)`,
+      heroId: playerHeroes.get(nickname).heroId,
+      skinIndex: playerHeroes.get(nickname).skinIndex
+    };
+    players.push(player);
+    
+    sendJSON(res, {
+      success: true,
+      player: player,
+      wallet: playerWallets.get(nickname),
+      bp: playerBP.get(nickname),
+      skins: playerSkins.get(nickname),
+      hero: playerHeroes.get(nickname),
+      friends: friendsList.get(nickname),
+      party: partyMembers.get(nickname)
     });
     return;
   }
-  
-  // Получение состояния игры
+
+  // Состояние игры
   if (req.method === 'GET' && req.url === '/state') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ players: players, enemies: enemies }));
-    return;
-  }
-  
-  // Движение игрока
-  if (req.method === 'POST' && req.url === '/move') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', () => {
-      const data = JSON.parse(body);
-      const player = players.find(p => p.id === data.id);
-      if (player) {
-        player.x = data.x;
-        player.y = data.y;
-      }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true }));
+    // Движение врагов
+    players.forEach(player => {
+      if (player.hp <= 0) return;
+      enemies.forEach(enemy => {
+        if (enemy.hp <= 0) return;
+        const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
+        if (dist < 400 && dist > 20) {
+          enemy.x += (player.x - enemy.x) / dist * 1.5;
+          enemy.y += (player.y - enemy.y) / dist * 1.5;
+        }
+        if (dist < 30) player.hp -= 0.3;
+      });
     });
+    
+    sendJSON(res, { players: players, enemies: enemies.filter(e => e.hp > 0) });
     return;
   }
-  
+
+  // Движение
+  if (req.method === 'POST' && req.url === '/move') {
+    const data = await readBody(req);
+    const player = players.find(p => p.id === data.id);
+    if (player) { player.x = data.x; player.y = data.y; }
+    sendJSON(res, { success: true });
+    return;
+  }
+
   // Атака
   if (req.method === 'POST' && req.url === '/attack') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
-    req.on('end', () => {
-      const data = JSON.parse(body);
-      const player = players.find(p => p.id === data.id);
-      if (player) {
-        for (let enemy of enemies) {
-          const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
-          if (dist < 60 && enemy.hp > 0) {
-            enemy.hp -= 25;
-            if (enemy.hp <= 0) {
-              player.kills++;
-              enemy.hp = 60;
-              enemy.x = Math.random() * 1000;
-              enemy.y = Math.random() * 600;
-            }
-            break;
+    const data = await readBody(req);
+    const player = players.find(p => p.id === data.id);
+    if (player) {
+      for (let enemy of enemies) {
+        const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
+        if (dist < 60 && enemy.hp > 0) {
+          enemy.hp -= 25;
+          if (enemy.hp <= 0) {
+            player.kills++;
+            const coins = 5;
+            playerWallets.set(player.nickname, (playerWallets.get(player.nickname) || 0) + coins);
+            // XP для БП
+            const bp = playerBP.get(player.nickname) || { type: 'free', level: 1, xp: 0 };
+            bp.xp = (bp.xp || 0) + 10;
+            if (bp.xp >= 100) { bp.xp -= 100; bp.level = Math.min(100, bp.level + 1); }
+            playerBP.set(player.nickname, bp);
+            // Возрождение врага
+            enemy.hp = 60;
+            enemy.x = Math.random() * 1000;
+            enemy.y = Math.random() * 600;
           }
+          break;
         }
       }
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ success: true }));
-    });
+    }
+    sendJSON(res, { success: true, wallet: playerWallets.get(player.nickname), bp: playerBP.get(player.nickname) });
     return;
   }
-  
+
+  // Промокод
+  if (req.method === 'POST' && req.url === '/promo') {
+    const data = await readBody(req);
+    const code = data.code.toUpperCase();
+    const nickname = data.nickname.toLowerCase();
+    
+    if (promoCodes.has(code)) {
+      const amount = promoCodes.get(code);
+      playerWallets.set(nickname, (playerWallets.get(nickname) || 0) + amount);
+      promoCodes.delete(code);
+      sendJSON(res, { success: true, type: 'coins', amount: amount, wallet: playerWallets.get(nickname) });
+    } else if (bpPromoCodes.has(code)) {
+      const bpType = bpPromoCodes.get(code);
+      const bp = playerBP.get(nickname) || { type: 'free', level: 1, xp: 0 };
+      bp.type = bpType;
+      if (bpType === 'plus') bp.level = Math.min(100, bp.level + 25);
+      playerBP.set(nickname, bp);
+      bpPromoCodes.delete(code);
+      sendJSON(res, { success: true, type: 'bp', bpType: bpType, bp: bp });
+    } else {
+      sendJSON(res, { error: 'Неверный код!' });
+    }
+    return;
+  }
+
+  // Бан (root)
+  if (req.method === 'POST' && req.url === '/ban') {
+    const data = await readBody(req);
+    if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
+    bannedPlayers.add(data.target.toLowerCase());
+    players = players.filter(p => p.nickname !== data.target.toLowerCase());
+    usedNicknames.delete(data.target.toLowerCase());
+    sendJSON(res, { success: true, target: data.target });
+    return;
+  }
+
+  // Разбан
+  if (req.method === 'POST' && req.url === '/unban') {
+    const data = await readBody(req);
+    if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
+    bannedPlayers.delete(data.target.toLowerCase());
+    sendJSON(res, { success: true, target: data.target });
+    return;
+  }
+
+  // Создать промокод (root)
+  if (req.method === 'POST' && req.url === '/createPromo') {
+    const data = await readBody(req);
+    if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
+    promoCodes.set(data.code.toUpperCase(), data.amount);
+    sendJSON(res, { success: true, code: data.code, amount: data.amount });
+    return;
+  }
+
+  // Выдать валюту (root)
+  if (req.method === 'POST' && req.url === '/giveCurrency') {
+    const data = await readBody(req);
+    if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
+    const target = data.target.toLowerCase();
+    playerWallets.set(target, (playerWallets.get(target) || 0) + data.amount);
+    sendJSON(res, { success: true, target: target, amount: data.amount });
+    return;
+  }
+
+  // Список игроков
+  if (req.method === 'GET' && req.url === '/players') {
+    const list = Array.from(usedNicknames).map(n => ({
+      nickname: n,
+      wallet: playerWallets.get(n) || 0,
+      bp: playerBP.get(n) || { type: 'free', level: 1 },
+      banned: bannedPlayers.has(n)
+    }));
+    sendJSON(res, list);
+    return;
+  }
+
+  // Герои и скины
+  if (req.method === 'POST' && req.url === '/heroSelect') {
+    const data = await readBody(req);
+    playerHeroes.set(data.nickname.toLowerCase(), { heroId: data.heroId, skinIndex: data.skinIndex || 0 });
+    const player = players.find(p => p.nickname === data.nickname.toLowerCase());
+    if (player) { player.heroId = data.heroId; player.skinIndex = data.skinIndex || 0; }
+    sendJSON(res, { success: true });
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/buySkin') {
+    const data = await readBody(req);
+    const nickname = data.nickname.toLowerCase();
+    const wallet = playerWallets.get(nickname) || 0;
+    if (wallet >= data.price) {
+      playerWallets.set(nickname, wallet - data.price);
+      const skins = playerSkins.get(nickname) || {};
+      if (!skins[data.heroId]) skins[data.heroId] = [0];
+      if (!skins[data.heroId].includes(data.skinIndex)) skins[data.heroId].push(data.skinIndex);
+      playerSkins.set(nickname, skins);
+      playerHeroes.set(nickname, { heroId: data.heroId, skinIndex: data.skinIndex });
+      sendJSON(res, { success: true, wallet: playerWallets.get(nickname), skins: skins });
+    } else {
+      sendJSON(res, { error: 'Недостаточно монет!' });
+    }
+    return;
+  }
+
+  // Добавить друга
+  if (req.method === 'POST' && req.url === '/addFriend') {
+    const data = await readBody(req);
+    const nickname = data.nickname.toLowerCase();
+    const friend = data.friend.toLowerCase();
+    if (!usedNicknames.has(friend)) { sendJSON(res, { error: 'Игрок не найден!' }); return; }
+    const friends = friendsList.get(nickname) || [];
+    if (!friends.includes(friend)) friends.push(friend);
+    friendsList.set(nickname, friends);
+    sendJSON(res, { success: true, friends: friends });
+    return;
+  }
+
+  // Пригласить в пати
+  if (req.method === 'POST' && req.url === '/inviteParty') {
+    const data = await readBody(req);
+    const nickname = data.nickname.toLowerCase();
+    const target = data.target.toLowerCase();
+    const party = partyMembers.get(nickname) || [nickname];
+    if (party.length >= 5) { sendJSON(res, { error: 'Пати заполнена!' }); return; }
+    if (!party.includes(target)) party.push(target);
+    partyMembers.set(nickname, party);
+    sendJSON(res, { success: true, party: party });
+    return;
+  }
+
   res.writeHead(404);
   res.end('Not found');
 });
