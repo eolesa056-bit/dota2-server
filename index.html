@@ -3,150 +3,123 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Defense of the Ancients</title>
+  <title>Defense of the Ancients - ПРОБУЖДЕНИЕ ДРЕВНИХ</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: #0a0e17;
-      min-height: 100vh;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: radial-gradient(ellipse at center, #1a1f2e 0%, #0a0d14 100%);
-      overflow: hidden;
-      touch-action: manipulation;
-    }
-    .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #121827 0%, #0a0f1a 100%); }
-    .top-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      background: linear-gradient(180deg, #1b1e2a 0%, #0a0c14 100%);
-      padding: 8px 15px; border-bottom: 2px solid #b89b4b; flex-shrink: 0; flex-wrap: wrap; gap: 5px;
-    }
-    .nav-btn {
-      background: linear-gradient(180deg, #3d3222 0%, #1f180e 100%);
-      border: 1px solid #7a6a4a; color: #e0c78b; font-weight: bold;
-      font-size: 0.75rem; padding: 8px 12px; border-radius: 6px; cursor: pointer;
-      text-transform: uppercase; letter-spacing: 0.5px; transition: 0.2s; white-space: nowrap;
-    }
-    .nav-btn:hover { color: #ffd966; border-color: #c9a03d; }
-    .nav-btn.active { background: #c9a03d; color: #000; border-color: #ffd700; }
-    .admin-btn { background: #4a0020; border-color: #ff4444; color: #ff8888; display: none; }
-    .user-info { color: #d4af37; font-weight: bold; cursor: pointer; font-size: 0.8rem; }
-    .currency-display { color: #ffd700; font-weight: bold; font-size: 0.8rem; }
+    body { background: #0a0000; min-height: 100vh; font-family: 'Segoe UI', Arial, sans-serif; background: radial-gradient(ellipse at center, #1a0000 0%, #050000 100%); overflow: hidden; touch-action: manipulation; }
+    .app { width: 100vw; height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, #120000 0%, #050000 100%); }
+    .top-bar { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(180deg, #1b0000 0%, #0a0000 100%); padding: 8px 15px; border-bottom: 2px solid #8b0000; flex-shrink: 0; flex-wrap: wrap; gap: 5px; box-shadow: 0 4px 20px rgba(255,0,0,0.2); }
+    .nav-btn { background: linear-gradient(180deg, #3d0000 0%, #1f0000 100%); border: 1px solid #7a0000; color: #e07878; font-weight: bold; font-size: 0.75rem; padding: 8px 12px; border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: 0.3s; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+    .nav-btn:hover { color: #ff9696; border-color: #c93030; box-shadow: 0 0 15px rgba(255,0,0,0.4); transform: translateY(-1px); }
+    .nav-btn.active { background: #c93030; color: #000; border-color: #ff4444; box-shadow: 0 0 20px rgba(255,0,0,0.6); }
+    .bp-btn { background: linear-gradient(180deg, #6B0000, #8B0000) !important; border-color: #D43030 !important; color: #FF4444 !important; animation: glowRed 2s infinite; }
+    @keyframes glowRed { 0%,100%{box-shadow:0 0 8px #ff0000,0 0 15px #ff0000} 50%{box-shadow:0 0 20px #ff4444,0 0 35px #ff0000} }
+    .admin-btn { background: #4a0000; border-color: #ff4444; color: #ff8888; display: none; box-shadow: 0 0 15px rgba(255,0,0,0.5); }
+    .user-info { color: #ff3030; font-weight: bold; cursor: pointer; font-size: 0.8rem; text-shadow: 0 0 10px rgba(255,0,0,0.5); }
+    .currency-display { color: #ff4444; font-weight: bold; font-size: 0.8rem; animation: glowText 2s infinite; }
+    @keyframes glowText { 0%,100%{text-shadow:0 0 5px #ff0000} 50%{text-shadow:0 0 15px #ff4444} }
     .main-content { flex: 1; overflow-y: auto; padding: 10px; }
     .screen { display: none; height: 100%; }
     .screen.active { display: flex; flex-direction: column; }
-    
     .register-screen { justify-content: center; align-items: center; }
-    .register-title { font-size: 1.5rem; color: #d4af37; margin-bottom: 20px; text-align: center; }
-    .register-input {
-      background: #1a1e2a; border: 2px solid #b89b4b; color: #e0d7b0;
-      padding: 12px 20px; font-size: 1rem; border-radius: 12px; width: 90%; max-width: 280px;
-      text-align: center; margin-bottom: 15px; outline: none;
-    }
-    .error-msg { color: #ff6b6b; margin-bottom: 10px; display: none; font-size: 0.85rem; }
-    .confirm-btn {
-      background: radial-gradient(circle at 30% 20%, #f0c45a, #aa7c2c);
-      border: none; color: #1f1407; font-weight: bold; font-size: 1.2rem;
-      padding: 12px 35px; border-radius: 40px; cursor: pointer; box-shadow: 0 4px 0 #6b4c1c; text-transform: uppercase;
-    }
-    
-    .attribute-tabs { display: flex; gap: 5px; justify-content: center; margin-bottom: 15px; flex-wrap: wrap; }
-    .attr-tab {
-      padding: 8px 12px; text-align: center; font-weight: bold; font-size: 0.8rem;
-      border-radius: 8px; cursor: pointer; border: 2px solid transparent;
-      background: #1a1e28; color: #9e9e9e; flex: 1; min-width: 80px;
-    }
-    .attr-tab.strength { border-color: #b33e2c; color: #d4776a; }
+    .register-title { font-size: 1.8rem; color: #ff3030; margin-bottom: 25px; text-align: center; text-shadow: 0 0 20px rgba(255,0,0,0.6); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    .register-input { background: #1a0000; border: 2px solid #8b0000; color: #ff8888; padding: 14px 22px; font-size: 1.1rem; border-radius: 14px; width: 90%; max-width: 300px; text-align: center; margin-bottom: 18px; outline: none; box-shadow: inset 0 0 15px rgba(255,0,0,0.2); transition: 0.3s; }
+    .error-msg { color: #ff6b6b; margin-bottom: 12px; display: none; font-size: 0.9rem; }
+    .confirm-btn { background: radial-gradient(circle at 30% 20%, #ff3030, #aa0000); border: none; color: #1f0000; font-weight: bold; font-size: 1.3rem; padding: 14px 40px; border-radius: 45px; cursor: pointer; box-shadow: 0 5px 0 #6b0000,0 0 25px rgba(255,0,0,0.5); text-transform: uppercase; transition: 0.2s; }
+    .attribute-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .attr-tab { padding: 10px 16px; text-align: center; font-weight: bold; font-size: 0.85rem; border-radius: 10px; cursor: pointer; border: 2px solid transparent; background: #1a0000; color: #9e9e9e; flex: 1; min-width: 90px; transition: 0.3s; }
+    .attr-tab:hover { border-color: #ff4444; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+    .attr-tab.strength { border-color: #b33030; color: #d47777; }
     .attr-tab.agility { border-color: #2e8b57; color: #6fcf97; }
     .attr-tab.intelligence { border-color: #2a6fdb; color: #6da8f0; }
-    .attr-tab.active.strength { background: #3d1e1a; color: #ff9e8c; }
-    .attr-tab.active.agility { background: #1a3322; color: #8effb0; }
-    .attr-tab.active.intelligence { background: #15213d; color: #9bc3ff; }
-    
-    .hero-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; max-height: 40vh; overflow-y: auto; }
-    .hero-card {
-      background: #171c26; border-radius: 10px; padding: 10px 5px; text-align: center;
-      cursor: pointer; border: 2px solid #2f3540; transition: 0.2s;
-    }
-    .hero-card:hover { border-color: #d4af37; transform: translateY(-2px); }
-    .hero-card.selected { border-color: #f0c45a; box-shadow: 0 0 15px #b8860b; background: #2a2f3c; }
-    .hero-avatar { font-size: 2rem; }
-    .hero-name { color: #e0d7b0; font-weight: bold; font-size: 0.7rem; }
-    
-    .hero-detail { display: none; background: #1a1f2e; border-radius: 10px; padding: 15px; margin-top: 15px; border: 1px solid #b89b4b; }
-    .hero-detail-content { display: flex; flex-direction: column; gap: 10px; }
+    .attr-tab.active.strength { background: #3d0000; color: #ff9e9e; box-shadow: 0 0 25px rgba(255,0,0,0.6); }
+    .attr-tab.active.agility { background: #1a3300; color: #8effb0; box-shadow: 0 0 25px rgba(0,255,0,0.4); }
+    .attr-tab.active.intelligence { background: #150030; color: #9bc3ff; box-shadow: 0 0 25px rgba(0,0,255,0.4); }
+    .hero-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; max-height: 55vh; overflow-y: auto; padding: 8px; }
+    .hero-card { background: #170000; border-radius: 14px; padding: 14px 8px; text-align: center; cursor: pointer; border: 2px solid #2f0000; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .hero-card:hover { border-color: #ff3030; transform: translateY(-4px); background: #200000; box-shadow: 0 8px 25px rgba(255,0,0,0.3); }
+    .hero-card.selected { border-color: #ff4444; box-shadow: 0 0 30px rgba(255,0,0,0.7); background: #2a0000; animation: selectedGlow 1.5s infinite; }
+    @keyframes selectedGlow { 0%,100%{box-shadow:0 0 20px rgba(255,0,0,0.5)} 50%{box-shadow:0 0 40px rgba(255,0,0,0.9)} }
+    .hero-avatar { font-size: 3rem; margin-bottom: 5px; filter: drop-shadow(0 0 8px rgba(255,0,0,0.5)); }
+    .hero-name { color: #ff8888; font-weight: bold; font-size: 0.8rem; margin-top: 5px; text-shadow: 0 0 5px rgba(255,0,0,0.3); }
+    .hero-detail-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 100; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+    .hero-detail-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    .hero-detail-popup { background: linear-gradient(135deg, #1a0000, #0d0000); border-radius: 18px; padding: 25px; border: 2px solid #ff4444; width: 90%; max-width: 850px; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: 0 0 60px rgba(255,0,0,0.5); animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from{transform:translateY(50px);opacity:0} to{transform:translateY(0);opacity:1} }
+    .close-detail-btn { position: absolute; top: 12px; right: 12px; background: #ff0000; color: white; border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; z-index: 10; box-shadow: 0 0 15px rgba(255,0,0,0.6); transition: 0.2s; }
+    .hero-detail-content { display: flex; flex-direction: column; gap: 15px; }
     @media (min-width: 768px) { .hero-detail-content { flex-direction: row; } }
-    .hero-detail-left, .hero-detail-center, .hero-detail-right { background: #0f131c; padding: 12px; border-radius: 8px; color: #c0b090; flex: 1; }
+    .hero-detail-left, .hero-detail-center, .hero-detail-right { background: rgba(15,0,0,0.8); padding: 18px; border-radius: 12px; color: #ffaaaa; flex: 1; border: 1px solid rgba(255,0,0,0.2); }
     .hero-detail-center { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .hero-model-large { font-size: 4rem; animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-    .skin-option {
-      background: #1a1e2a; padding: 8px; margin: 4px 0; border-radius: 6px;
-      cursor: pointer; border: 2px solid #2f3540; color: #c0b090;
-      display: flex; justify-content: space-between; font-size: 0.8rem; transition: 0.2s;
-    }
-    .skin-option:hover { border-color: #d4af37; }
-    .skin-option.selected { border-color: #ffd700; box-shadow: 0 0 10px #b8860b; }
-    .skin-option.locked { opacity: 0.5; cursor: not-allowed; }
-    .skin-price { background: #ffd700; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
-    
-    .play-game-btn {
-      display: block; margin: 15px auto; background: radial-gradient(circle at 30% 20%, #4CAF50, #2E7D32);
-      border: none; color: white; font-weight: bold; font-size: 1.1rem; padding: 12px 40px;
-      border-radius: 40px; cursor: pointer; width: 90%; max-width: 300px; box-shadow: 0 4px 0 #1B5E20;
-    }
-    
+    .hero-detail-avatar { font-size: 6rem; animation: floatLarge 3s ease-in-out infinite; filter: drop-shadow(0 0 20px rgba(255,0,0,0.6)); }
+    @keyframes floatLarge { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-12px) scale(1.05)} }
+    .skin-option { background: rgba(26,0,0,0.8); padding: 10px; margin: 6px 0; border-radius: 8px; cursor: pointer; border: 2px solid #2f0000; color: #ffaaaa; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; transition: 0.3s; }
+    .skin-option:hover { border-color: #ff4444; box-shadow: 0 0 15px rgba(255,0,0,0.4); }
+    .skin-option.selected { border-color: #ff4444; box-shadow: 0 0 20px rgba(255,0,0,0.6); background: rgba(40,0,0,0.8); }
+    .skin-option.locked { opacity: 0.4; cursor: not-allowed; }
+    .skin-price { background: #ff4444; color: #000; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
     .party-container { display: flex; flex-direction: column; gap: 15px; }
     @media (min-width: 768px) { .party-container { flex-direction: row; } }
-    .party-section, .friends-section, .lobby-section {
-      background: #1a1e2a; border-radius: 10px; padding: 15px; border: 1px solid #2a2a3a; flex: 1;
-    }
-    .section-title { color: #d4af37; font-weight: bold; margin-bottom: 10px; font-size: 1rem; }
-    .player-slot {
-      background: #252a38; border-radius: 6px; padding: 8px; margin: 3px 0;
-      color: #c0b090; border: 1px solid #2f3540; font-size: 0.8rem;
-    }
-    .player-slot.empty { opacity: 0.5; font-style: italic; }
-    .add-friend-input { background: #252a38; border: 1px solid #b89b4b; color: #e0d7b0; padding: 8px; border-radius: 6px; width: 100%; margin: 3px 0; font-size: 0.8rem; }
-    .small-btn { background: #c9a03d; border: none; color: #000; font-weight: bold; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.75rem; }
-    .lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 6px; background: #252a38; border-radius: 6px; margin: 2px 0; color: #c0b090; font-size: 0.8rem; }
-    .invite-btn { background: #4CAF50; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-    
+    .party-section, .friends-section, .lobby-section { background: #1a0000; border-radius: 14px; padding: 18px; border: 1px solid #2a0000; flex: 1; }
+    .section-title { color: #ff3030; font-weight: bold; margin-bottom: 14px; font-size: 1.1rem; }
+    .player-slot { background: #250000; border-radius: 8px; padding: 10px; margin: 5px 0; color: #ffaaaa; border: 1px solid #3a0000; font-size: 0.85rem; }
+    .player-slot.empty { opacity: 0.4; font-style: italic; }
+    .add-friend-input { background: #250000; border: 1px solid #8b0000; color: #ff8888; padding: 10px; border-radius: 8px; width: 100%; margin: 5px 0; font-size: 0.85rem; }
+    .small-btn { background: #c93030; border: none; color: #000; font-weight: bold; padding: 7px 14px; border-radius: 7px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; box-shadow: 0 3px 0 #6b0000; }
+    .lobby-player { display: flex; align-items: center; justify-content: space-between; padding: 8px; background: #250000; border-radius: 8px; margin: 4px 0; color: #ffaaaa; font-size: 0.85rem; border: 1px solid #2a0000; }
+    .invite-btn { background: #4CAF50; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.75rem; }
     .finding-screen { justify-content: center; align-items: center; }
-    .finding-title { font-size: 1.3rem; color: #d4af37; margin-bottom: 15px; }
-    .squares-grid { display: flex; gap: 6px; margin: 15px 0; flex-wrap: wrap; justify-content: center; }
-    .player-square { width: 40px; height: 40px; background: #1a1e2a; border: 2px solid #3a3e4a; border-radius: 8px; }
-    .player-square.confirmed { background: #b8860b; border-color: #ffd700; box-shadow: 0 0 15px #ffd700; }
-    
+    .finding-title { font-size: 1.6rem; color: #ff3030; margin-bottom: 25px; text-align: center; text-shadow: 0 0 20px rgba(255,0,0,0.5); }
+    .squares-grid { display: flex; gap: 10px; margin: 25px 0; flex-wrap: wrap; justify-content: center; }
+    .player-square { width: 48px; height: 48px; background: #1a0000; border: 2px solid #3a0000; border-radius: 10px; transition: 0.4s; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
+    .player-square.confirmed { background: #b80000; border-color: #ff4444; box-shadow: 0 0 30px rgba(255,0,0,0.7); animation: confirmPulse 0.5s ease; }
+    @keyframes confirmPulse { 0%{transform:scale(1)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
     .game-screen { position: relative; }
-    canvas { display: block; margin: 0 auto; border-radius: 8px; background: radial-gradient(circle at 20% 30%, #2d4a32, #1b2a1a); width: 100%; height: auto; }
-    .info-panel {
-      display: flex; justify-content: space-between; align-items: center; margin-top: 8px;
-      color: #e0d7b0; font-weight: bold; background: linear-gradient(180deg, #3f3627 0%, #1f1a13 100%);
-      border-radius: 30px; padding: 8px 15px; border: 1px solid #b89b6b; font-size: 0.75rem; flex-wrap: wrap; gap: 5px;
-    }
-    .hp-bar { width: 100px; height: 10px; background: #2d1a1a; border-radius: 10px; overflow: hidden; }
-    .hp-fill { height: 100%; background: linear-gradient(90deg, #d43f3f, #ff6a4b); transition: 0.15s; }
-    .dead-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 20; }
-    .dead-overlay.show { display: flex; }
-    .respawn-btn { background: radial-gradient(circle at 30% 20%, #4a90d9, #2a5a8a); border: none; color: white; font-weight: bold; font-size: 1rem; padding: 10px 25px; border-radius: 30px; cursor: pointer; margin-top: 10px; }
-    
-    .admin-panel {
-      display: none; position: fixed; top: 5%; left: 5%; right: 5%; bottom: 5%;
-      background: linear-gradient(135deg, #1a0030, #0d001a); padding: 20px; border-radius: 15px;
-      border: 2px solid #ffd700; color: #ffd700; z-index: 9999; overflow-y: auto;
-      box-shadow: 0 0 60px rgba(255,215,0,0.4);
-    }
-    .admin-panel h3 { text-align: center; font-size: 1.2rem; text-shadow: 0 0 20px #ffd700; }
-    .admin-section { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px; margin: 8px 0; border: 1px solid rgba(255,215,0,0.3); }
-    .admin-section h4 { color: #ffaa00; font-size: 0.85rem; margin-bottom: 5px; }
-    .admin-input { background: rgba(0,0,0,0.5); border: 1px solid #ffd700; color: #ffd700; padding: 6px 8px; margin: 3px; border-radius: 5px; width: calc(100% - 20px); font-size: 0.8rem; }
-    .admin-btn-gold { background: linear-gradient(180deg, #ffd700, #b8860b); border: none; padding: 6px 12px; margin: 3px; border-radius: 5px; cursor: pointer; color: #000; font-weight: bold; font-size: 0.75rem; }
-    .close-admin-btn { position: absolute; top: 8px; right: 8px; background: #ff4444; color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 14px; }
-    
-    .mobile-controls { display: none; gap: 5px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
-    .mobile-btn { background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); color: white; font-weight: bold; font-size: 1.2rem; width: 50px; height: 50px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; touch-action: manipulation; }
-    .mobile-btn:active { background: rgba(255,255,255,0.4); }
-    .attack-mobile-btn { background: rgba(255,0,0,0.4); border-color: rgba(255,0,0,0.6); width: 80px; font-size: 0.9rem; }
+    canvas { display: block; margin: 0 auto; border-radius: 12px; background: radial-gradient(circle at 20% 30%, #2d0000, #150000); box-shadow: 0 0 40px rgba(255,0,0,0.2); }
+    .info-panel { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; color: #ff8888; font-weight: bold; background: linear-gradient(180deg, #3f0000 0%, #1f0000 100%); border-radius: 40px; padding: 12px 22px; border: 1px solid #8b0000; font-size: 0.85rem; flex-wrap: wrap; gap: 10px; }
+    .hp-bar { width: 120px; height: 12px; background: #2d0000; border-radius: 20px; overflow: hidden; border: 1px solid #5a0000; }
+    .hp-fill { height: 100%; background: linear-gradient(90deg, #ff2020, #ff4444); transition: 0.3s; box-shadow: 0 0 10px rgba(255,0,0,0.5); }
+    .dead-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 20; border-radius: 12px; }
+    .dead-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+    .respawn-btn { background: radial-gradient(circle at 30% 20%, #4a0000, #2a0000); border: none; color: white; font-weight: bold; font-size: 1.2rem; padding: 14px 35px; border-radius: 40px; cursor: pointer; margin-top: 15px; box-shadow: 0 5px 0 #1a0000,0 0 20px rgba(255,0,0,0.4); }
+    .admin-panel { display: none; position: fixed; top: 5%; left: 5%; right: 5%; bottom: 5%; background: linear-gradient(135deg, #1a0000, #0d0000); padding: 25px; border-radius: 20px; border: 2px solid #ff4444; color: #ff4444; z-index: 9999; overflow-y: auto; box-shadow: 0 0 80px rgba(255,0,0,0.5); }
+    .admin-panel h3 { text-align: center; font-size: 1.4rem; text-shadow: 0 0 25px #ff4444; margin-bottom: 18px; }
+    .admin-section { background: rgba(255,255,255,0.03); border-radius: 12px; padding: 14px; margin: 12px 0; border: 1px solid rgba(255,0,0,0.3); }
+    .admin-section h4 { color: #ff6600; font-size: 0.95rem; margin-bottom: 10px; }
+    .admin-input { background: rgba(0,0,0,0.6); border: 1px solid #ff4444; color: #ff4444; padding: 8px 12px; margin: 5px; border-radius: 7px; width: calc(100% - 28px); font-size: 0.85rem; }
+    .admin-btn-gold { background: linear-gradient(180deg, #ff4444, #b80000); border: none; padding: 8px 16px; margin: 5px; border-radius: 7px; cursor: pointer; color: #000; font-weight: bold; font-size: 0.85rem; }
+    .close-admin-btn { position: absolute; top: 12px; right: 12px; background: #ff0000; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; }
+    .mobile-controls { display: none; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+    .mobile-btn { background: rgba(255,0,0,0.2); border: 2px solid rgba(255,0,0,0.5); color: white; font-weight: bold; font-size: 1.4rem; width: 55px; height: 55px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; touch-action: manipulation; }
+    .attack-mobile-btn { background: rgba(255,0,0,0.5); border-color: rgba(255,0,0,0.8); width: 90px; font-size: 1.1rem; }
+    .bp-screen { padding: 15px; }
+    .bp-header { text-align: center; color: #FF4444; font-size: 1.6rem; margin-bottom: 18px; text-shadow: 0 0 20px #FF4444; animation: pulse 2s infinite; }
+    .bp-progress { background: #1a0000; border-radius: 18px; padding: 18px; margin-bottom: 18px; border: 2px solid #D43030; box-shadow: 0 0 25px rgba(255,0,0,0.3); }
+    .bp-level { font-size: 2.2rem; color: #FF4444; text-align: center; text-shadow: 0 0 15px #ff0000; }
+    .bp-bar { width: 100%; height: 22px; background: #2d0000; border-radius: 15px; overflow: hidden; margin: 12px 0; }
+    .bp-fill { height: 100%; background: linear-gradient(90deg, #D43030, #FF4444); transition: 0.4s; box-shadow: 0 0 15px rgba(255,0,0,0.5); }
+    .bp-buy-section { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 18px 0; }
+    .bp-card { background: #1a0000; border-radius: 14px; padding: 18px; text-align: center; border: 2px solid #2f0000; flex: 1; min-width: 160px; transition: 0.3s; }
+    .bp-card.free { border-color: #3a3a3a; background: #150000; }
+    .bp-card.premium { border-color: #FF4444; box-shadow: 0 0 25px rgba(255,0,0,0.5); animation: glowPremium 2s infinite; }
+    .bp-card.plus { border-color: #FF4444; box-shadow: 0 0 30px rgba(255,0,0,0.7); animation: glowPlus 2s infinite; }
+    @keyframes glowPremium { 0%,100%{box-shadow:0 0 20px rgba(255,0,0,0.4)} 50%{box-shadow:0 0 40px rgba(255,0,0,0.8)} }
+    @keyframes glowPlus { 0%,100%{box-shadow:0 0 25px rgba(255,0,0,0.6)} 50%{box-shadow:0 0 50px rgba(255,0,0,1)} }
+    .bp-card h3 { color: #ff3030; margin-bottom: 10px; }
+    .bp-card .price { font-size: 1.3rem; color: #FF4444; font-weight: bold; }
+    .bp-rewards { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 6px; margin-top: 18px; }
+    .bp-reward { background: #1a0000; border-radius: 10px; padding: 10px; text-align: center; border: 1px solid #2f0000; font-size: 0.75rem; color: #ffaaaa; transition: 0.3s; }
+    .bp-reward.unlocked { border-color: #FF4444; background: #2a0000; box-shadow: 0 0 12px rgba(255,0,0,0.4); }
+    .bp-reward.locked-free { border-color: #3a3a3a; background: #150000; color: #666; }
+    .btn-activated { background: #4CAF50 !important; color: white !important; cursor: default; }
+    .dev-code-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.93); z-index: 200; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+    .dev-code-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+    .dev-code-popup { background: linear-gradient(135deg, #1a0000, #0d0000); border-radius: 18px; padding: 30px; border: 2px solid #ff4444; text-align: center; box-shadow: 0 0 50px rgba(255,0,0,0.6); }
+    .dev-code-popup h3 { color: #ff4444; margin-bottom: 18px; text-shadow: 0 0 15px #ff0000; }
+    .dev-code-input { background: #0a0000; border: 2px solid #ff4444; color: #ff4444; padding: 12px; font-size: 1.1rem; border-radius: 10px; width: 280px; text-align: center; margin-bottom: 15px; outline: none; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
+    @keyframes floatUp { 0%{opacity:1;transform:translate(-50%,0)} 100%{opacity:0;transform:translate(-50%,-60px)} }
   </style>
 </head>
 <body>
@@ -155,16 +128,16 @@
     <div style="display:flex;gap:5px;flex-wrap:wrap;">
       <button class="nav-btn active" data-screen="heroes">👥 Герои</button>
       <button class="nav-btn" data-screen="party">👥 Пати</button>
+      <button class="nav-btn bp-btn" data-screen="battlepass">🔥 БАТЛ ПАСС</button>
       <button class="nav-btn" data-screen="finding">⚔️ Играть</button>
       <button class="nav-btn" id="promoBtn">🎁</button>
       <button class="nav-btn admin-btn" id="adminBtn">👑</button>
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
-      <span class="currency-display">🪙<span id="currencyAmount">1000</span></span>
+      <span class="currency-display">🪙<span id="currencyAmount">0</span></span>
       <div class="user-info" id="userInfo"></div>
     </div>
   </div>
-
   <div class="main-content">
     <div class="screen register-screen active" id="registerScreen">
       <div class="register-title">👤 ВВЕДИТЕ НИКНЕЙМ</div>
@@ -172,299 +145,160 @@
       <div class="error-msg" id="errorMsg"></div>
       <button class="confirm-btn" id="registerBtn">✅ ПРОДОЛЖИТЬ</button>
     </div>
-
     <div class="screen" id="heroesScreen">
-      <h2 style="color:#d4af37;text-align:center;margin-bottom:10px;font-size:1.1rem;">ВЫБЕРИТЕ ГЕРОЯ</h2>
-      <div class="attribute-tabs">
-        <div class="attr-tab strength active" data-attr="strength">💪 Сила</div>
-        <div class="attr-tab agility" data-attr="agility">🏹 Ловкость</div>
-        <div class="attr-tab intelligence" data-attr="intelligence">📖 Интеллект</div>
-      </div>
+      <h2 style="color:#ff3030;text-align:center;margin-bottom:12px;font-size:1.3rem;text-shadow:0 0 15px rgba(255,0,0,0.5);">ВЫБЕРИТЕ ГЕРОЯ</h2>
+      <div class="attribute-tabs"><div class="attr-tab strength active" data-attr="strength">💪 Сила</div><div class="attr-tab agility" data-attr="agility">🏹 Ловкость</div><div class="attr-tab intelligence" data-attr="intelligence">📖 Интеллект</div></div>
       <div class="hero-grid" id="heroGrid"></div>
-      <div class="hero-detail" id="heroDetail">
-        <div class="hero-detail-content">
-          <div class="hero-detail-left" id="heroDesc"></div>
-          <div class="hero-detail-center" id="heroModel"></div>
-          <div class="hero-detail-right" id="heroSkins"></div>
-        </div>
-      </div>
-      <button class="play-game-btn" id="startGameBtn">⚡ НАЧАТЬ ИГРУ</button>
     </div>
-
     <div class="screen" id="partyScreen">
-      <h2 style="color:#d4af37;text-align:center;margin-bottom:15px;font-size:1.1rem;">👥 ПАТИ И ДРУЗЬЯ</h2>
-      <div class="party-container">
-        <div>
-          <div class="party-section">
-            <div class="section-title">👥 Моя пати (<span id="partyCount">1</span>/5)</div>
-            <div id="partySlots">
-              <div class="player-slot" id="partySlot0">Вы (лидер)</div>
-              <div class="player-slot empty" id="partySlot1">Пустой слот</div>
-              <div class="player-slot empty" id="partySlot2">Пустой слот</div>
-              <div class="player-slot empty" id="partySlot3">Пустой слот</div>
-              <div class="player-slot empty" id="partySlot4">Пустой слот</div>
-            </div>
-            <button class="small-btn" style="width:100%;margin-top:8px;" onclick="leaveParty()">Покинуть пати</button>
-          </div>
-          <div class="friends-section" style="margin-top:10px;">
-            <div class="section-title">👫 Друзья</div>
-            <input type="text" class="add-friend-input" id="addFriendInput" placeholder="Никнейм друга...">
-            <button class="small-btn" style="width:100%;" onclick="addFriend()">Добавить друга</button>
-            <div id="friendsList" style="margin-top:10px;"></div>
-          </div>
-        </div>
-        <div>
-          <div class="lobby-section">
-            <div class="section-title">🌍 Лобби (онлайн: <span id="onlineCount">0</span>)</div>
-            <div style="max-height:300px;overflow-y:auto;" id="lobbyPlayers"></div>
-          </div>
-        </div>
+      <h2 style="color:#ff3030;text-align:center;margin-bottom:18px;font-size:1.3rem;text-shadow:0 0 15px rgba(255,0,0,0.5);">👥 ПАТИ И ДРУЗЬЯ</h2>
+      <div class="party-container"><div><div class="party-section"><div class="section-title">👥 Моя пати (<span id="partyCount">1</span>/5)</div><div id="partySlots"><div class="player-slot">Вы (лидер)</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div><div class="player-slot empty">Пусто</div></div></div><div class="friends-section" style="margin-top:12px;"><div class="section-title">👫 Друзья</div><input type="text" class="add-friend-input" placeholder="Никнейм друга..."><button class="small-btn" style="width:100%;">Добавить</button></div></div><div><div class="lobby-section"><div class="section-title">🌍 Лобби (<span id="onlineCount">0</span>)</div><div id="lobbyPlayers" style="max-height:220px;overflow-y:auto;"></div></div></div></div>
+    </div>
+    <div class="screen bp-screen" id="battlepassScreen">
+      <div class="bp-header">🔥 ПРОБУЖДЕНИЕ ДРЕВНИХ — 1 СЕЗОН</div>
+      <div class="bp-progress"><div class="bp-level">Уровень <span id="bpLevel">1</span>/100</div><div class="bp-bar"><div class="bp-fill" id="bpFill" style="width:0%;"></div></div><p style="color:#ffaaaa;text-align:center;font-size:0.85rem;" id="bpXP">0/100 XP</p></div>
+      <div class="bp-buy-section">
+        <div class="bp-card free"><h3>🆓 Бесплатный</h3><p style="color:#666;font-size:0.85rem;">Базовые награды</p><div class="price" style="color:#888;">0 🪙</div><button class="small-btn" style="background:#444;color:#888;">Активирован</button></div>
+        <div class="bp-card premium" id="bpPremiumCard"><h3>⭐ Обычный</h3><p style="color:#ffaaaa;font-size:0.85rem;">Все награды</p><div class="price">5500 🪙</div><button class="small-btn" id="bpPremiumBtn" onclick="buyBP('premium')">Купить</button></div>
+        <div class="bp-card plus" id="bpPlusCard"><h3>👑 Батл Пасс +</h3><p style="color:#ffaaaa;font-size:0.85rem;">+25 уровней сразу</p><div class="price">8000 🪙</div><button class="small-btn" id="bpPlusBtn" onclick="buyBP('plus')">Купить</button></div>
       </div>
+      <p style="color:#ffaaaa;text-align:center;font-size:0.8rem;">Улучшить с Обычного до + : 2500 🪙 <button class="small-btn" id="bpUpgradeBtn" onclick="upgradeBP()">Улучшить</button></p>
+      <div class="bp-rewards" id="bpRewards"></div>
     </div>
-
     <div class="screen finding-screen" id="findingScreen">
-      <div class="finding-title">🔍 ПОИСК ИГРЫ...</div>
-      <div class="squares-grid" id="squaresGrid"></div>
-      <button class="confirm-btn" id="confirmSearchBtn">✅ ПОДТВЕРДИТЬ</button>
-      <p style="color:#a0977a;margin-top:10px;font-size:0.85rem;" id="confirmStatus">0/10 игроков подтвердили</p>
-      <button class="nav-btn" style="margin-top:10px;" id="cancelSearchBtn">↩️ Отмена</button>
+      <div class="finding-title">🔍 ПОИСК ИГРЫ...</div><div class="squares-grid" id="squaresGrid"></div>
+      <button class="confirm-btn" id="confirmSearchBtn">✅ ПОДТВЕРДИТЬ</button><p style="color:#a0977a;margin-top:12px;font-size:0.9rem;" id="confirmStatus">0/10</p>
+      <button class="nav-btn" style="margin-top:12px;" id="cancelSearchBtn">↩️ Отмена</button>
     </div>
-
     <div class="screen game-screen" id="gameScreen">
       <canvas id="gameCanvas"></canvas>
-      <div class="dead-overlay" id="deadOverlay">
-        <div style="color:#d4af37;font-size:1.5rem;font-weight:bold;">💀 ВЫ ПАЛИ 💀</div>
-        <button class="respawn-btn" id="respawnBtn">🔄 ВОЗРОДИТЬСЯ</button>
-        <button class="nav-btn" style="margin-top:8px;" id="backToMenuFromDeath">↩️ В МЕНЮ</button>
-      </div>
-      <div class="info-panel">
-        <span id="heroDisplayName">⚔️ Герой</span>
-        <div class="hp-bar"><div id="playerHpFill" class="hp-fill" style="width:100%;"></div></div>
-        <span>🏆 <span id="killCount">0</span></span>
-        <button class="nav-btn" id="backToMenuBtn">↩️ Меню</button>
-      </div>
-      <div class="mobile-controls" id="mobileControls">
-        <div style="display:grid;grid-template-areas:'.. up ..' 'left .. right' '.. down ..';gap:3px;">
-          <button class="mobile-btn" style="grid-area:up;" id="btnUp">▲</button>
-          <button class="mobile-btn" style="grid-area:left;" id="btnLeft">◄</button>
-          <button class="mobile-btn" style="grid-area:right;" id="btnRight">►</button>
-          <button class="mobile-btn" style="grid-area:down;" id="btnDown">▼</button>
-        </div>
-        <button class="mobile-btn attack-mobile-btn" id="btnAttack">⚔️ АТАКА</button>
-      </div>
+      <div class="dead-overlay" id="deadOverlay"><div style="color:#ff3030;font-size:1.8rem;font-weight:bold;text-shadow:0 0 20px #ff0000;">💀 ВЫ ПАЛИ 💀</div><button class="respawn-btn" id="respawnBtn">🔄 ВОЗРОДИТЬСЯ</button><button class="nav-btn" style="margin-top:10px;" id="backToMenuFromDeath">↩️ В МЕНЮ</button></div>
+      <div class="info-panel"><span id="heroDisplayName">⚔️</span><div class="hp-bar"><div id="playerHpFill" class="hp-fill" style="width:100%;"></div></div><span>🏆<span id="killCount">0</span></span><button class="nav-btn" id="backToMenuBtn">↩️</button></div>
+      <div class="mobile-controls" id="mobileControls"><div style="display:grid;grid-template-areas:'.. up ..' 'left .. right' '.. down ..';gap:4px;"><button class="mobile-btn" style="grid-area:up;" id="btnUp">▲</button><button class="mobile-btn" style="grid-area:left;" id="btnLeft">◄</button><button class="mobile-btn" style="grid-area:right;" id="btnRight">►</button><button class="mobile-btn" style="grid-area:down;" id="btnDown">▼</button></div><button class="mobile-btn attack-mobile-btn" id="btnAttack">⚔️ АТАКА</button></div>
     </div>
   </div>
 </div>
 
-<div class="admin-panel" id="adminPanel">
-  <button class="close-admin-btn" onclick="closeAdminPanel()">✕</button>
-  <h3>👑 Админ-панель</h3>
-  <div class="admin-section">
-    <h4>🎫 Создать промокод</h4>
-    <input type="text" class="admin-input" id="promoCodeInput" placeholder="Код">
-    <input type="number" class="admin-input" id="promoAmountInput" placeholder="Сумма">
-    <button class="admin-btn-gold" onclick="createPromoCode()">Создать</button>
-  </div>
-  <div class="admin-section">
-    <h4>🚫 Бан/Разбан</h4>
-    <input type="text" class="admin-input" id="banNicknameInput" placeholder="Никнейм">
-    <button class="admin-btn-gold" onclick="banPlayer()">Забанить</button>
-    <button class="admin-btn-gold" onclick="unbanPlayer()">Разбанить</button>
-  </div>
-  <div class="admin-section">
-    <h4>🪙 Выдать валюту</h4>
-    <input type="text" class="admin-input" id="giveCurrencyNickname" placeholder="Никнейм">
-    <input type="number" class="admin-input" id="giveCurrencyAmount" placeholder="Сумма">
-    <button class="admin-btn-gold" onclick="giveCurrency()">Выдать</button>
-  </div>
-  <div class="admin-section">
-    <h4>👥 Игроки онлайн</h4>
-    <div id="playerList" style="max-height:150px;overflow-y:auto;font-size:0.8rem;"></div>
+<div class="hero-detail-overlay" id="heroDetailOverlay">
+  <div class="hero-detail-popup">
+    <button class="close-detail-btn" onclick="closeHeroDetail()">✕</button>
+    <div class="hero-detail-content">
+      <div class="hero-detail-left" id="heroDesc"></div>
+      <div class="hero-detail-center" id="heroModel"></div>
+      <div class="hero-detail-right" id="heroSkins"></div>
+    </div>
   </div>
 </div>
 
+<div class="dev-code-overlay" id="devCodeOverlay">
+  <div class="dev-code-popup">
+    <h3>🔐 ВВЕДИТЕ КОД РАЗРАБОТЧИКА</h3>
+    <input type="text" class="dev-code-input" id="devCodeInput" placeholder="Код доступа" maxlength="20" autocomplete="off">
+    <div class="error-msg" id="devCodeError" style="color:#ff6b6b;"></div>
+    <button class="confirm-btn" id="devCodeBtn" style="margin-top:12px;">✅ ПОДТВЕРДИТЬ</button>
+  </div>
+</div>
+
+<div class="admin-panel" id="adminPanel"><button class="close-admin-btn" onclick="closeAdminPanel()">✕</button><h3>👑 Админ-панель</h3><div class="admin-section"><h4>🎫 Промокод (валюта)</h4><input class="admin-input" id="promoCodeInput" placeholder="Код"><input type="number" class="admin-input" id="promoAmountInput" placeholder="Сумма"><button class="admin-btn-gold" onclick="createPromoCode()">Создать</button></div><div class="admin-section"><h4>🔥 Промокод на Батл Пасс</h4><input class="admin-input" id="bpPromoCodeInput" placeholder="Код"><select class="admin-input" id="bpPromoType"><option value="premium">Обычный БП</option><option value="plus">БП +</option></select><button class="admin-btn-gold" onclick="createBPPromoCode()">Создать</button></div><div class="admin-section"><h4>🚫 Бан</h4><input class="admin-input" id="banNicknameInput" placeholder="Никнейм"><button class="admin-btn-gold" onclick="banPlayer()">Бан</button><button class="admin-btn-gold" onclick="unbanPlayer()">Разбан</button></div><div class="admin-section"><h4>🪙 Выдать валюту</h4><input class="admin-input" id="giveCurrencyNickname" placeholder="Никнейм"><input type="number" class="admin-input" id="giveCurrencyAmount" placeholder="Сумма"><button class="admin-btn-gold" onclick="giveCurrency()">Выдать</button></div><div class="admin-section"><h4>👥 Игроки</h4><div id="playerList" style="max-height:150px;overflow-y:auto;"></div></div></div>
+
 <script>
-// ========== ПОЛНЫЙ КОД ИГРЫ ==========
-const isMobile = /Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
-if (isMobile) document.getElementById('mobileControls').style.display = 'flex';
+const isMobile=/Android|iPhone|iPad|iPod|webOS/i.test(navigator.userAgent);
+if(isMobile)document.getElementById('mobileControls').style.display='flex';
+const canvas=document.getElementById('gameCanvas'),ctx=canvas.getContext('2d');
+function resizeCanvas(){canvas.width=Math.min(window.innerWidth-20,1000);canvas.height=Math.min(window.innerHeight-250,500);}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-function resizeCanvas() { canvas.width = Math.min(window.innerWidth-20, 1000); canvas.height = Math.min(window.innerHeight-250, 500); }
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
+let currentUser=null,currentAttr='strength',selectedHeroId='axe',selectedSkin=0,ws=null,myId=null,gameState={players:[],enemies:[]},gameActive=!1,confirmedPlayers=0,currencyTimer=0;
+const totalPlayers=10,DEV_CODE='DOTA2_DEV',promoCodes=new Map(),bpPromoCodes=new Map(),bannedPlayers=new Set(),usedNicknames=new Set();
+let playerWallets=new Map(),playerSkins=new Map(),friendsList=new Map(),partyMembers=[],playerBP=new Map();
 
-let currentUser = null, currentAttr = 'strength', selectedHeroId = 'axe', selectedSkin = 0;
-let ws = null, myId = null, gameState = { players: [], enemies: [] }, gameActive = false;
-let confirmedPlayers = 0, playerWallets = new Map(), playerSkins = new Map(), friendsList = new Map(), partyMembers = [];
-const totalPlayers = 10, adminAccounts = new Set(['admin', 'root', 'moderator']), promoCodes = new Map(), bannedPlayers = new Set(), usedNicknames = new Set();
+promoCodes.set('DOTA100',100);promoCodes.set('DOTA500',500);promoCodes.set('DOTA1000',1000);
+bpPromoCodes.set('BPFREE','premium');bpPromoCodes.set('BPPLUS','plus');
 
-function drawHero(ctx, heroId, skin, x, y, s=1) {
-  ctx.save(); ctx.translate(x,y); ctx.scale(s,s);
-  const colors = {
-    axe: [['#c1440e','#ffcc80','#f00','#999'],['#2a5a8c','#aaccff','#4a90d9','#ff0'],['#ff8c00','#ffdd88','#ffd700','#f44']],
-    pudge: [['#5d7a3a','#ffaa77','#8B0000'],['#6b8e23','#ffcc88','#f00'],['#daa520','#ffdd99','#ffd700']],
-    sven: [['#3a5a8c','#ccc','#ddd'],['#5a3a8c','#ddaadd','#eec'],['#8c8c3a','#ffdd88','#fe8']],
-    antimage: [['#5a208a','#dda0dd','#0ce'],['#7a40aa','#eec','#8ff'],['#2a2a2a','#888','#f44']],
-    sniper: [['#2d6a2d','#ffe4b5','#666'],['#4a8a4a','#fdb','#888'],['#8a2d2d','#fca','#f44']],
-    shadowfiend: [['#1a001a','#2a002a','#f50'],['#2d002d','#4a004a','#f60'],['#4a004a','#6a006a','#f80']],
-    lina: [['#e84420','#ffe4b5','#ffd700'],['#ff5530','#fed','#fa0'],['#ff6640','#fff','#fc0']]
-  };
-  const c = colors[heroId] ? (colors[heroId][skin] || colors[heroId][0]) : ['#808080','#ffccaa','#000'];
-  ctx.fillStyle = c[0]; ctx.fillRect(-14,-8,28,24);
-  ctx.fillStyle = c[1]; ctx.beginPath(); ctx.arc(0,-12,8,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle = c[2]; ctx.fillRect(12,-4,14,3);
-  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(-3,-13,1.5,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.arc(3,-13,1.5,0,Math.PI*2); ctx.fill();
-  ctx.restore();
-}
+function getWallet(n){if(!playerWallets.has(n))playerWallets.set(n,0);return playerWallets.get(n);}
+function getBP(n){if(!playerBP.has(n))playerBP.set(n,{type:'free',level:1,xp:0});return playerBP.get(n);}
+function getPurchasedSkins(u){if(!playerSkins.has(u))playerSkins.set(u,{});return playerSkins.get(u);}
+function isSkinPurchased(u,h,i){if(i===0)return!0;const s=getPurchasedSkins(u);return s[h]&&s[h].includes(i);}
+function purchaseSkin(u,h,i){const s=getPurchasedSkins(u);if(!s[h])s[h]=[0];if(!s[h].includes(i))s[h].push(i);playerSkins.set(u,s);}
+function updateCurrencyDisplay(){if(currentUser)document.getElementById('currencyAmount').textContent=getWallet(currentUser);}
+function showFloatingText(text){const el=document.createElement('div');el.textContent=text;el.style.cssText='position:fixed;top:20%;left:50%;transform:translateX(-50%);color:#ff4444;font-weight:bold;font-size:1.3rem;z-index:9999;animation:floatUp 2s forwards;pointer-events:none;text-shadow:0 0 10px #ff0000;';document.body.appendChild(el);setTimeout(()=>el.remove(),2000);}
 
-const heroes = {
-  strength: [
-    { id: 'axe', name: 'Axe', avatar: '🪓', hp: 130, dmg: 38, speed: 2.8, desc: 'Могучий воин с топором. Врывается в гущу битвы и крушит врагов.', skins: [{name:'Кровавый воин',price:0},{name:'Громовой берсерк',price:500},{name:'Огненный разрушитель',price:1000}] },
-    { id: 'pudge', name: 'Pudge', avatar: '🪝', hp: 150, dmg: 42, speed: 2.4, desc: 'Толстый мясник с крюком. Затаскивает врагов и разрывает их.', skins: [{name:'Деревенский мясник',price:0},{name:'Мясник-убийца',price:500},{name:'Золотой повар',price:1000}] },
-    { id: 'sven', name: 'Sven', avatar: '⚔️', hp: 120, dmg: 45, speed: 3.0, desc: 'Странствующий рыцарь с огромным мечом.', skins: [{name:'Стальной рыцарь',price:0},{name:'Мистический воин',price:500},{name:'Королевский страж',price:1000}] }
-  ],
-  agility: [
-    { id: 'antimage', name: 'Anti-Mage', avatar: '🌀', hp: 100, dmg: 34, speed: 4.0, desc: 'Охотник на магов. Быстрый и смертоносный.', skins: [{name:'Магический убийца',price:0},{name:'Лунный охотник',price:500},{name:'Теневой странник',price:1000}] },
-    { id: 'sniper', name: 'Sniper', avatar: '🎯', hp: 85, dmg: 40, speed: 3.2, desc: 'Меткий стрелок. Уничтожает врагов на расстоянии.', skins: [{name:'Снайпер-ветеран',price:0},{name:'Арбалетчик',price:500},{name:'Взрывной стрелок',price:1000}] },
-    { id: 'shadowfiend', name: 'Shadow Fiend', avatar: '👻', hp: 100, dmg: 50, speed: 3.5, desc: 'Тёмный лорд. Собирает души и выпускает тьму.', skins: [{name:'Тёмный властелин',price:0},{name:'Повелитель душ',price:500},{name:'Архидемон',price:1000}] }
-  ],
-  intelligence: [
-    { id: 'lina', name: 'Lina', avatar: '🔥', hp: 95, dmg: 44, speed: 3.1, desc: 'Огненная волшебница. Мощные заклинания огня.', skins: [{name:'Пламя дракона',price:0},{name:'Вулканическая жрица',price:500},{name:'Метеоритная ведьма',price:1000}] }
-  ]
-};
+const heroes={strength:[{id:'axe',name:'Axe',avatar:'🪓',hp:130,dmg:38,speed:2.8,desc:'Могучий воин с топором. Врывается в битву и крушит врагов.',skins:[{name:'Кровавый воин',price:0},{name:'Громовой берсерк',price:500},{name:'Огненный разрушитель',price:1000}]},{id:'pudge',name:'Pudge',avatar:'🪝',hp:150,dmg:42,speed:2.4,desc:'Толстый мясник с крюком.',skins:[{name:'Мясник',price:0},{name:'Убийца',price:500},{name:'Повар',price:1000}]},{id:'sven',name:'Sven',avatar:'⚔️',hp:120,dmg:45,speed:3.0,desc:'Рыцарь с огромным мечом.',skins:[{name:'Стальной',price:0},{name:'Мистик',price:500},{name:'Король',price:1000}]}],agility:[{id:'antimage',name:'Anti-Mage',avatar:'🌀',hp:100,dmg:34,speed:4.0,desc:'Охотник на магов.',skins:[{name:'Магический',price:0},{name:'Лунный',price:500},{name:'Теневой',price:1000}]},{id:'sniper',name:'Sniper',avatar:'🎯',hp:85,dmg:40,speed:3.2,desc:'Меткий стрелок.',skins:[{name:'Снайпер',price:0},{name:'Арбалет',price:500},{name:'Взрыв',price:1000}]},{id:'shadowfiend',name:'Shadow Fiend',avatar:'👻',hp:100,dmg:50,speed:3.5,desc:'Тёмный лорд.',skins:[{name:'Тьма',price:0},{name:'Души',price:500},{name:'Демон',price:1000}]}],intelligence:[{id:'lina',name:'Lina',avatar:'🔥',hp:95,dmg:44,speed:3.1,desc:'Огненная волшебница.',skins:[{name:'Пламя',price:0},{name:'Вулкан',price:500},{name:'Метеор',price:1000}]}]};
 
-function getWallet(n) { if(!playerWallets.has(n)) playerWallets.set(n,1000); return playerWallets.get(n); }
-function getPurchasedSkins(u) { if(!playerSkins.has(u)) playerSkins.set(u,{}); return playerSkins.get(u); }
-function isSkinPurchased(u,h,i) { if(i===0) return true; const s=getPurchasedSkins(u); return s[h]&&s[h].includes(i); }
-function purchaseSkin(u,h,i) { const s=getPurchasedSkins(u); if(!s[h]) s[h]=[0]; if(!s[h].includes(i)) s[h].push(i); playerSkins.set(u,s); }
+function showScreen(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.remove('active'));const map={register:'registerScreen',heroes:'heroesScreen',party:'partyScreen',battlepass:'battlepassScreen',finding:'findingScreen',game:'gameScreen'};if(map[name])document.getElementById(map[name]).classList.add('active');const btn=document.querySelector(`.nav-btn[data-screen="${name}"]`);if(btn)btn.classList.add('active');if(name==='battlepass')updateBPDisplay();}
+document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>{btn.addEventListener('click',()=>{if(!currentUser&&btn.dataset.screen!=='register'){showScreen('register');return;}if(btn.dataset.screen==='finding'){confirmedPlayers=0;updateSquares();}showScreen(btn.dataset.screen);});});
 
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn[data-screen]').forEach(b=>b.classList.remove('active'));
-  const map={register:'registerScreen',heroes:'heroesScreen',party:'partyScreen',finding:'findingScreen',game:'gameScreen'};
-  if(map[name]) document.getElementById(map[name]).classList.add('active');
-  const btn=document.querySelector(`.nav-btn[data-screen="${name}"]`);
-  if(btn) btn.classList.add('active');
-}
-
-document.querySelectorAll('.nav-btn[data-screen]').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    if(!currentUser&&btn.dataset.screen!=='register'){showScreen('register');return;}
-    if(btn.dataset.screen==='finding'){confirmedPlayers=0;updateSquares();}
-    showScreen(btn.dataset.screen);
-  });
-});
-
-document.getElementById('registerBtn').addEventListener('click',()=>{
-  const nickname=document.getElementById('nicknameInput').value.trim();
+function registerUser(nickname){
   if(!nickname){document.getElementById('errorMsg').textContent='Введите ник!';document.getElementById('errorMsg').style.display='block';return;}
-  if(bannedPlayers.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='Вы забанены!';document.getElementById('errorMsg').style.display='block';return;}
+  if(bannedPlayers.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='⛔ Вы забанены!';document.getElementById('errorMsg').style.display='block';return;}
   if(usedNicknames.has(nickname.toLowerCase())){document.getElementById('errorMsg').textContent='Ник занят!';document.getElementById('errorMsg').style.display='block';return;}
-  usedNicknames.add(nickname.toLowerCase());
-  currentUser=nickname;
+  usedNicknames.add(nickname.toLowerCase());currentUser=nickname;
   document.getElementById('userInfo').textContent='👤 '+nickname;
-  if(adminAccounts.has(nickname.toLowerCase())){document.getElementById('adminBtn').style.display='inline-block';document.getElementById('userInfo').textContent+=' 👑';}
-  document.getElementById('errorMsg').style.display='none';
-  document.getElementById('nicknameInput').value='';
-  updateCurrencyDisplay();
-  updateLobby();
+  if(nickname.toLowerCase()==='root'){document.getElementById('adminBtn').style.display='inline-block';document.getElementById('userInfo').textContent+=' 👑';}
+  document.getElementById('errorMsg').style.display='none';document.getElementById('nicknameInput').value='';
+  updateCurrencyDisplay();updateLobby();
   const protocol=window.location.protocol==='https:'?'wss:':'ws:';
   ws=new WebSocket(`${protocol}//${window.location.host}`);
-  ws.onopen=()=>{ws.send(JSON.stringify({type:'nickname',nickname}));ws.send(JSON.stringify({type:'heroSelect',heroId:selectedHeroId,skinIndex:selectedSkin}));};
+  ws.onopen=()=>{ws.send(JSON.stringify({type:'nickname',nickname:nickname}));ws.send(JSON.stringify({type:'heroSelect',heroId:selectedHeroId,skinIndex:selectedSkin}));};
   ws.onmessage=(e)=>{const d=JSON.parse(e.data);if(d.type==='init')myId=d.playerId;if(d.type==='update')gameState=d;};
   showScreen('heroes');renderHeroGrid();
-});
-
-function updateCurrencyDisplay(){if(currentUser)document.getElementById('currencyAmount').textContent=getWallet(currentUser);}
-
-function renderHeroGrid(){
-  const grid=document.getElementById('heroGrid');grid.innerHTML='';
-  heroes[currentAttr].forEach(h=>{
-    const card=document.createElement('div');
-    card.className=`hero-card ${h.id===selectedHeroId?'selected':''}`;
-    card.innerHTML=`<div class="hero-avatar">${h.avatar}</div><div class="hero-name">${h.name}</div>`;
-    card.onclick=()=>{selectedHeroId=h.id;if(currentUser){const s=getPurchasedSkins(currentUser);selectedSkin=(s[h.id]&&s[h.id][0])||0;}renderHeroGrid();showHeroDetail(h.id);};
-    grid.appendChild(card);
-  });
 }
 
-function showHeroDetail(heroId){
-  const hero=Object.values(heroes).flat().find(h=>h.id===heroId);if(!hero)return;
-  document.getElementById('heroDesc').innerHTML=`<h3 style="color:#d4af37;">${hero.name}</h3><p style="margin:8px 0;">${hero.desc}</p><p>❤️ ${hero.hp} | ⚔️ ${hero.dmg} | 🏃 ${hero.speed}</p>`;
-  const lc=document.createElement('canvas');lc.width=150;lc.height=150;const lctx=lc.getContext('2d');drawHero(lctx,heroId,selectedSkin,75,75,3);
-  document.getElementById('heroModel').innerHTML='';document.getElementById('heroModel').appendChild(lc);
-  document.getElementById('heroModel').innerHTML+=`<p style="color:#d4af37;margin-top:8px;">${hero.name}</p>`;
-  const wallet=currentUser?getWallet(currentUser):0;
-  document.getElementById('heroSkins').innerHTML='<h4 style="color:#d4af37;margin-bottom:8px;">Скины</h4>'+hero.skins.map((s,i)=>{
-    const purchased=isSkinPurchased(currentUser,heroId,i);
-    return `<div class="skin-option ${i===selectedSkin?'selected':''} ${!purchased&&i>0?'locked':''}" onclick="${purchased?`selectSkin('${heroId}',${i})`:i>0?`buySkin('${heroId}',${i},${s.price})`:`selectSkin('${heroId}',0)`}"><span>${s.name}</span>${i>0&&!purchased?`<span class="skin-price">${s.price}🪙</span>`:i>0?'<span style="color:#4CAF50;">✓</span>':'<span class="skin-price">Бесплатно</span>'}</div>`;
-  }).join('');
-  document.getElementById('heroDetail').style.display='block';
-}
+document.getElementById('registerBtn').addEventListener('click',()=>{const n=document.getElementById('nicknameInput').value.trim();if(n.toLowerCase()==='root'){document.getElementById('devCodeOverlay').classList.add('show');document.getElementById('devCodeInput').value='';document.getElementById('devCodeError').textContent='';}else registerUser(n);});
+document.getElementById('devCodeBtn').addEventListener('click',()=>{const code=document.getElementById('devCodeInput').value.trim();if(code===DEV_CODE){document.getElementById('devCodeOverlay').classList.remove('show');registerUser('root');}else document.getElementById('devCodeError').textContent='Неверный код доступа!';});
+document.getElementById('devCodeInput').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('devCodeBtn').click();});
 
+function renderHeroGrid(){const grid=document.getElementById('heroGrid');grid.innerHTML='';const ch=heroes[currentAttr];if(!ch)return;ch.forEach(h=>{const card=document.createElement('div');card.className=`hero-card ${h.id===selectedHeroId?'selected':''}`;card.innerHTML=`<div class="hero-avatar">${h.avatar}</div><div class="hero-name">${h.name}</div>`;card.onclick=function(){selectedHeroId=h.id;if(currentUser){const ss=getPurchasedSkins(currentUser);selectedSkin=(ss[h.id]&&ss[h.id][0])||0;}renderHeroGrid();showHeroDetail(h.id);};grid.appendChild(card);});}
+
+function showHeroDetail(heroId){const hero=Object.values(heroes).flat().find(h=>h.id===heroId);if(!hero)return;document.getElementById('heroDesc').innerHTML=`<h3 style="color:#ff3030;">${hero.name}</h3><p style="margin:10px 0;color:#ffaaaa;">${hero.desc}</p><p style="color:#ff8888;">❤️ ${hero.hp} | ⚔️ ${hero.dmg} | 🏃 ${hero.speed}</p>`;document.getElementById('heroModel').innerHTML=`<div class="hero-detail-avatar">${hero.avatar}</div><p style="color:#ff3030;margin-top:12px;font-size:1.1rem;">${hero.name}</p>`;const wallet=currentUser?getWallet(currentUser):0;document.getElementById('heroSkins').innerHTML='<h4 style="color:#ff3030;margin-bottom:10px;">Скины</h4>'+hero.skins.map((s,i)=>{const purchased=isSkinPurchased(currentUser,heroId,i);return `<div class="skin-option ${i===selectedSkin?'selected':''} ${!purchased&&i>0?'locked':''}" onclick="${purchased?`window.selectSkin('${heroId}',${i})`:i>0?`window.buySkin('${heroId}',${i},${s.price})`:`window.selectSkin('${heroId}',0)`}"><span>${s.name}</span>${i>0&&!purchased?`<span class="skin-price">${s.price}🪙</span>`:i>0?'<span style="color:#4CAF50;">✓</span>':'<span class="skin-price">Бесплатно</span>'}</div>`;}).join('');document.getElementById('heroDetailOverlay').classList.add('show');}
+
+function closeHeroDetail(){document.getElementById('heroDetailOverlay').classList.remove('show');}
 window.selectSkin=function(hId,idx){selectedSkin=idx;if(currentUser){const s=getPurchasedSkins(currentUser);if(!s[hId])s[hId]=[0];s[hId]=s[hId].filter(x=>x!==idx);s[hId].unshift(idx);playerSkins.set(currentUser,s);}renderHeroGrid();showHeroDetail(hId);};
-window.buySkin=function(hId,idx,price){if(!currentUser)return;if(getWallet(currentUser)>=price){playerWallets.set(currentUser,getWallet(currentUser)-price);purchaseSkin(currentUser,hId,idx);selectedSkin=idx;updateCurrencyDisplay();renderHeroGrid();showHeroDetail(hId);alert('Скин куплен!');}else alert('Недостаточно монет!');};
+window.buySkin=function(hId,idx,price){if(!currentUser)return;if(getWallet(currentUser)>=price){playerWallets.set(currentUser,getWallet(currentUser)-price);purchaseSkin(currentUser,hId,idx);selectedSkin=idx;updateCurrencyDisplay();renderHeroGrid();showHeroDetail(hId);alert('Скин куплен!');}else alert(`Недостаточно монет! Нужно ${price}🪙`);};
 
-document.querySelectorAll('.attr-tab').forEach(tab=>{tab.addEventListener('click',()=>{currentAttr=tab.dataset.attr;document.querySelectorAll('.attr-tab').forEach(t=>t.classList.remove('active'));tab.classList.add('active');selectedHeroId=heroes[currentAttr][0].id;selectedSkin=0;renderHeroGrid();});});
+document.querySelectorAll('.attr-tab').forEach(tab=>{tab.addEventListener('click',function(){currentAttr=this.dataset.attr;document.querySelectorAll('.attr-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');if(heroes[currentAttr]&&heroes[currentAttr].length>0){selectedHeroId=heroes[currentAttr][0].id;selectedSkin=0;renderHeroGrid();closeHeroDetail();}});});
+document.getElementById('heroDetailOverlay').addEventListener('click',function(e){if(e.target===this)closeHeroDetail();});
 
 function updateSquares(){const g=document.getElementById('squaresGrid');g.innerHTML='';for(let i=0;i<totalPlayers;i++){const s=document.createElement('div');s.className=`player-square ${i<confirmedPlayers?'confirmed':''}`;g.appendChild(s);}document.getElementById('confirmStatus').textContent=`${confirmedPlayers}/${totalPlayers}`;}
 document.getElementById('confirmSearchBtn').addEventListener('click',()=>{if(confirmedPlayers<totalPlayers){confirmedPlayers++;updateSquares();if(confirmedPlayers>=totalPlayers)setTimeout(()=>showScreen('heroes'),600);}});
 document.getElementById('cancelSearchBtn').addEventListener('click',()=>showScreen('heroes'));
 
-document.getElementById('startGameBtn').addEventListener('click',()=>{gameActive=true;showScreen('game');const hero=Object.values(heroes).flat().find(h=>h.id===selectedHeroId);document.getElementById('heroDisplayName').textContent=`${hero.avatar} ${hero.name}`;resizeCanvas();});
-
-// Пати и друзья
-function updatePartyDisplay(){for(let i=0;i<5;i++){const slot=document.getElementById(`partySlot${i}`);if(i===0){slot.innerHTML=currentUser?`${currentUser} (лидер)`:'Вы (лидер)';slot.className='player-slot';}else if(partyMembers[i-1]){slot.innerHTML=partyMembers[i-1];slot.className='player-slot';}else{slot.innerHTML='Пустой слот';slot.className='player-slot empty';}}document.getElementById('partyCount').textContent=1+partyMembers.length;}
+function updatePartyDisplay(){for(let i=0;i<5;i++){const slot=document.getElementById(`partySlot${i}`);if(i===0){slot.innerHTML=currentUser?`${currentUser} (лидер)`:'Вы (лидер)';slot.className='player-slot';}else if(partyMembers[i-1]){slot.innerHTML=partyMembers[i-1];slot.className='player-slot';}else{slot.innerHTML='Пусто';slot.className='player-slot empty';}}document.getElementById('partyCount').textContent=1+partyMembers.length;}
 window.addFriend=function(){if(!currentUser)return;const f=document.getElementById('addFriendInput').value.trim().toLowerCase();if(!f||!usedNicknames.has(f))return alert('Игрок не найден!');if(!friendsList.has(currentUser))friendsList.set(currentUser,[]);const fl=friendsList.get(currentUser);if(!fl.includes(f)){fl.push(f);friendsList.set(currentUser,fl);updateFriendsList();document.getElementById('addFriendInput').value='';}};
 window.inviteToParty=function(n){if(partyMembers.length>=4)return alert('Пати заполнена!');if(!partyMembers.includes(n)){partyMembers.push(n);updatePartyDisplay();}};
-window.leaveParty=function(){partyMembers=[];updatePartyDisplay();};
 function updateFriendsList(){const c=document.getElementById('friendsList');if(!currentUser){c.innerHTML='';return;}const f=friendsList.get(currentUser)||[];c.innerHTML=f.map(x=>`<div class="lobby-player"><span>👤 ${x}</span><button class="invite-btn" onclick="inviteToParty('${x}')">Пригласить</button></div>`).join('');}
-function updateLobby(){const c=document.getElementById('lobbyPlayers');const all=Array.from(usedNicknames);document.getElementById('onlineCount').textContent=all.length;c.innerHTML=all.map(n=>`<div class="lobby-player"><span>👤 ${n}</span><button class="invite-btn" onclick="inviteToParty('${n}')">Пригласить</button></div>`).join('');}
+function updateLobby(){const c=document.getElementById('lobbyPlayers');const all=Array.from(usedNicknames);document.getElementById('onlineCount').textContent=all.length;c.innerHTML=all.map(n=>{const isBanned=bannedPlayers.has(n);return `<div class="lobby-player" style="${isBanned?'opacity:0.5;text-decoration:line-through;':''}"><span>👤 ${n} ${isBanned?'🚫':''}</span>${!isBanned?`<button class="invite-btn" onclick="inviteToParty('${n}')">Пригласить</button>`:'<span style="color:#ff4444;">Забанен</span>'}</div>`;}).join('');}
 
-// Админка
-window.createPromoCode=function(){const c=document.getElementById('promoCodeInput').value.trim();const a=parseInt(document.getElementById('promoAmountInput').value);if(c&&a>0){promoCodes.set(c.toUpperCase(),a);alert(`Промокод ${c.toUpperCase()} создан на ${a}🪙`);}};
-window.banPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(n&&usedNicknames.has(n)){bannedPlayers.add(n);alert(`Игрок ${n} забанен`);updatePlayerList();}};
-window.unbanPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(n){bannedPlayers.delete(n);alert(`Игрок ${n} разбанен`);updatePlayerList();}};
-window.giveCurrency=function(){const n=document.getElementById('giveCurrencyNickname').value.trim().toLowerCase();const a=parseInt(document.getElementById('giveCurrencyAmount').value);if(n&&a>0){playerWallets.set(n,getWallet(n)+a);alert(`Выдано ${a}🪙 игроку ${n}`);updatePlayerList();}};
+function updateBPDisplay(){if(!currentUser)return;const bp=getBP(currentUser);document.getElementById('bpLevel').textContent=bp.level;document.getElementById('bpFill').style.width=(bp.level-1)+'%';document.getElementById('bpXP').textContent=bp.xp+'/100 XP';const premiumBtn=document.getElementById('bpPremiumBtn');const plusBtn=document.getElementById('bpPlusBtn');const upgradeBtn=document.getElementById('bpUpgradeBtn');if(premiumBtn){premiumBtn.textContent='Купить';premiumBtn.className='small-btn';premiumBtn.onclick=function(){buyBP('premium');};}if(plusBtn){plusBtn.textContent='Купить';plusBtn.className='small-btn';plusBtn.onclick=function(){buyBP('plus');};}if(upgradeBtn)upgradeBtn.style.display='inline-block';if(bp.type==='premium'){if(premiumBtn){premiumBtn.textContent='✅ Активирован';premiumBtn.className='small-btn btn-activated';premiumBtn.onclick=null;}}else if(bp.type==='plus'){if(premiumBtn){premiumBtn.textContent='✅ Активирован';premiumBtn.className='small-btn btn-activated';premiumBtn.onclick=null;}if(plusBtn){plusBtn.textContent='✅ Активирован';plusBtn.className='small-btn btn-activated';plusBtn.onclick=null;}if(upgradeBtn)upgradeBtn.style.display='none';}const rewards=document.getElementById('bpRewards');rewards.innerHTML='';for(let i=1;i<=100;i++){let unlocked,cls;if(bp.type==='free'){unlocked=bp.level>=i&&i%5===0;cls=unlocked?'unlocked':'locked-free';}else{unlocked=bp.level>=i;cls=unlocked?'unlocked':'';}rewards.innerHTML+=`<div class="bp-reward ${cls}">Ур.${i}<br>${unlocked?'🎁':'🔒'}</div>`;}}
+
+window.buyBP=function(type){if(!currentUser)return;const bp=getBP(currentUser);if(bp.type==='premium'&&type==='premium')return alert('Уже активирован!');if(bp.type==='plus')return alert('Уже активирован Батл Пасс +!');const price=type==='premium'?5500:8000;if(getWallet(currentUser)>=price){playerWallets.set(currentUser,getWallet(currentUser)-price);bp.type=type;if(type==='plus')bp.level=Math.min(100,bp.level+25);playerBP.set(currentUser,bp);updateCurrencyDisplay();updateBPDisplay();alert(`Батл Пасс ${type==='premium'?'Обычный':'+'} активирован!`);}else alert('Недостаточно монет!');};
+window.upgradeBP=function(){if(!currentUser)return;const bp=getBP(currentUser);if(bp.type!=='premium')return alert('Сначала купите Обычный БП!');if(getWallet(currentUser)>=2500){playerWallets.set(currentUser,getWallet(currentUser)-2500);bp.type='plus';bp.level=Math.min(100,bp.level+25);playerBP.set(currentUser,bp);updateCurrencyDisplay();updateBPDisplay();alert('Батл Пасс улучшен до +!');}else alert('Недостаточно монет! Нужно 2500🪙');};
+window.createPromoCode=function(){const c=document.getElementById('promoCodeInput').value.trim();const a=parseInt(document.getElementById('promoAmountInput').value);if(c&&a>0){promoCodes.set(c.toUpperCase(),a);alert(`Промокод ${c.toUpperCase()} на ${a}🪙`);}};
+window.createBPPromoCode=function(){const c=document.getElementById('bpPromoCodeInput').value.trim();const t=document.getElementById('bpPromoType').value;if(c){bpPromoCodes.set(c.toUpperCase(),t);alert(`Промокод ${c.toUpperCase()} на ${t==='premium'?'Обычный':'+'} БП создан!`);}};
+window.banPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(!n)return alert('Введите ник!');bannedPlayers.add(n);alert(`${n} забанен!`);document.getElementById('banNicknameInput').value='';updatePlayerList();updateLobby();};
+window.unbanPlayer=function(){const n=document.getElementById('banNicknameInput').value.trim().toLowerCase();if(!n)return alert('Введите ник!');if(bannedPlayers.has(n)){bannedPlayers.delete(n);alert(`${n} разбанен!`);}else alert('Не в бане');document.getElementById('banNicknameInput').value='';updatePlayerList();updateLobby();};
+window.giveCurrency=function(){const n=document.getElementById('giveCurrencyNickname').value.trim().toLowerCase();const a=parseInt(document.getElementById('giveCurrencyAmount').value);if(n&&a>0){playerWallets.set(n,getWallet(n)+a);alert(`Выдано ${a}🪙 игроку ${n}`);updatePlayerList();updateCurrencyDisplay();}};
 window.closeAdminPanel=function(){document.getElementById('adminPanel').style.display='none';};
-function updatePlayerList(){const l=document.getElementById('playerList');if(l)l.innerHTML=Array.from(usedNicknames).map(n=>`<div style="padding:4px 0;display:flex;justify-content:space-between;"><span>👤 ${n}</span><span>${getWallet(n)}🪙 ${bannedPlayers.has(n)?'🚫':''}</span></div>`).join('');}
+function updatePlayerList(){const l=document.getElementById('playerList');if(l)l.innerHTML=Array.from(usedNicknames).map(n=>`<div style="display:flex;justify-content:space-between;padding:4px 0;"><span>👤 ${n}</span><span>${getWallet(n)}🪙 BP:${getBP(n).type} Ур.${getBP(n).level} ${bannedPlayers.has(n)?'🚫':''}</span></div>`).join('');}
 
 document.getElementById('adminBtn').addEventListener('click',()=>{document.getElementById('adminPanel').style.display='block';updatePlayerList();});
-document.getElementById('promoBtn').addEventListener('click',()=>{if(!currentUser)return;const c=prompt('Введите промокод:');if(c&&promoCodes.has(c.toUpperCase())){const a=promoCodes.get(c.toUpperCase());playerWallets.set(currentUser,getWallet(currentUser)+a);promoCodes.delete(c.toUpperCase());alert(`+${a}🪙!`);updateCurrencyDisplay();}else alert('Неверный код');});
+document.getElementById('promoBtn').addEventListener('click',()=>{if(!currentUser)return;const c=prompt('Введите промокод:');if(!c)return;if(promoCodes.has(c.toUpperCase())){const a=promoCodes.get(c.toUpperCase());playerWallets.set(currentUser,getWallet(currentUser)+a);promoCodes.delete(c.toUpperCase());alert(`+${a}🪙!`);updateCurrencyDisplay();}else if(bpPromoCodes.has(c.toUpperCase())){const t=bpPromoCodes.get(c.toUpperCase());const bp=getBP(currentUser);bp.type=t;if(t==='plus')bp.level=Math.min(100,bp.level+25);playerBP.set(currentUser,bp);bpPromoCodes.delete(c.toUpperCase());alert(`Батл Пасс ${t==='premium'?'Обычный':'+'} активирован!`);updateBPDisplay();}else alert('Неверный код');});
 
-// Управление
 const keys={};
-document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;keys[e.key.toLowerCase()]=true;if(e.key===' '&&gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));e.preventDefault();});
-document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
-
-function setupMB(id,k){const b=document.getElementById(id);if(!b)return;b.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=true;});b.addEventListener('pointerup',e=>{keys[k]=false;});b.addEventListener('pointerleave',e=>{keys[k]=false;});}
-setupMB('btnUp','w');setupMB('btnDown','s');setupMB('btnLeft','a');setupMB('btnRight','d');
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;keys[e.key.toLowerCase()]=!0;if(e.key===' '&&gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));e.preventDefault();});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=!1;});
+['btnUp','btnDown','btnLeft','btnRight'].forEach((id,i)=>{const btn=document.getElementById(id);if(!btn)return;const k=['w','s','a','d'][i];btn.addEventListener('pointerdown',e=>{e.preventDefault();keys[k]=!0;});btn.addEventListener('pointerup',()=>{keys[k]=!1;});btn.addEventListener('pointerleave',()=>{keys[k]=!1;});});
 document.getElementById('btnAttack')?.addEventListener('pointerdown',e=>{e.preventDefault();if(gameActive&&ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'attack'}));});
 
-// Игра
-setInterval(()=>{
-  if(!gameActive||!ws||ws.readyState!==WebSocket.OPEN)return;
-  const me=gameState.players?.find(p=>p.id===myId);if(!me)return;
-  let dx=0,dy=0;
-  if(keys['w']||keys['arrowup'])dy--;if(keys['s']||keys['arrowdown'])dy++;if(keys['a']||keys['arrowleft'])dx--;if(keys['d']||keys['arrowright'])dx++;
-  if(dx||dy){const l=Math.sqrt(dx*dx+dy*dy);ws.send(JSON.stringify({type:'move',x:Math.max(15,Math.min(canvas.width-15,me.x+dx/l*5)),y:Math.max(15,Math.min(canvas.height-15,me.y+dy/l*5))}));}
-  document.getElementById('playerHpFill').style.width=Math.max(0,(me.hp/me.maxHp)*100)+'%';
-  document.getElementById('killCount').textContent=me.kills||0;
-  if(me.hp<=0)document.getElementById('deadOverlay').classList.add('show');
-},1000/60);
+setInterval(()=>{if(!gameActive||!ws||ws.readyState!==WebSocket.OPEN)return;const me=gameState.players?.find(p=>p.id===myId);if(!me)return;let dx=0,dy=0;if(keys['w'])dy--;if(keys['s'])dy++;if(keys['a'])dx--;if(keys['d'])dx++;if(dx||dy){const l=Math.sqrt(dx*dx+dy*dy);ws.send(JSON.stringify({type:'move',x:Math.max(15,Math.min(canvas.width-15,me.x+dx/l*5)),y:Math.max(15,Math.min(canvas.height-15,me.y+dy/l*5))}));}document.getElementById('playerHpFill').style.width=Math.max(0,(me.hp/me.maxHp)*100)+'%';const ok=me.oldKills||0;if(me.kills>ok&&currentUser){const earned=(me.kills-ok)*5;playerWallets.set(currentUser,getWallet(currentUser)+earned);updateCurrencyDisplay();showFloatingText(`+${earned}🪙`);me.oldKills=me.kills;const bp=getBP(currentUser);bp.xp+=10;if(bp.xp>=100){bp.xp-=100;bp.level=Math.min(100,bp.level+1);showFloatingText(`🔥 Уровень БП: ${bp.level}!`);}playerBP.set(currentUser,bp);}document.getElementById('killCount').textContent=me.kills||0;if(me.hp<=0)document.getElementById('deadOverlay').classList.add('show');},1000/60);
+setInterval(()=>{if(currentUser&&gameActive){currencyTimer++;if(currencyTimer>=60){currencyTimer=0;const cur=getWallet(currentUser);playerWallets.set(currentUser,cur+10);updateCurrencyDisplay();showFloatingText('+10🪙');}}},1000);
 
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#1d2b1a';ctx.fillRect(0,0,canvas.width,canvas.height);
-  if(gameState.enemies)gameState.enemies.forEach(e=>{ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fillStyle=e.hp>0?'#8b0000':'#333';ctx.fill();});
-  if(gameState.players)gameState.players.forEach(p=>{if(p.hp<=0)return;ctx.beginPath();ctx.arc(p.x,p.y,p.id===myId?14:11,0,Math.PI*2);ctx.fillStyle=p.color||'#ccc';ctx.fill();ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText(p.nickname||'',p.x,p.y-16);});
-  requestAnimationFrame(draw);
-}
+function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#1d0000';ctx.fillRect(0,0,canvas.width,canvas.height);if(gameState.enemies)gameState.enemies.forEach(e=>{ctx.beginPath();ctx.arc(e.x,e.y,10,0,Math.PI*2);ctx.fillStyle=e.hp>0?'#8b0000':'#333';ctx.fill();});if(gameState.players)gameState.players.forEach(p=>{if(p.hp<=0)return;ctx.beginPath();ctx.arc(p.x,p.y,p.id===myId?14:11,0,Math.PI*2);ctx.fillStyle=p.color||'#ccc';ctx.fill();ctx.fillStyle='#fff';ctx.font='10px Arial';ctx.textAlign='center';ctx.fillText(p.nickname||'',p.x,p.y-16);});requestAnimationFrame(draw);}
 draw();
 
 document.getElementById('respawnBtn').addEventListener('click',()=>document.getElementById('deadOverlay').classList.remove('show'));
-document.getElementById('backToMenuBtn').addEventListener('click',()=>{gameActive=false;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
-document.getElementById('backToMenuFromDeath').addEventListener('click',()=>{gameActive=false;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
+document.getElementById('backToMenuBtn').addEventListener('click',()=>{gameActive=!1;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
+document.getElementById('backToMenuFromDeath').addEventListener('click',()=>{gameActive=!1;document.getElementById('deadOverlay').classList.remove('show');showScreen('heroes');});
 document.getElementById('userInfo').addEventListener('click',()=>{if(currentUser&&confirm('Выйти?')){usedNicknames.delete(currentUser.toLowerCase());currentUser=null;document.getElementById('userInfo').textContent='';document.getElementById('adminBtn').style.display='none';document.getElementById('adminPanel').style.display='none';if(ws)ws.close();showScreen('register');}});
 document.getElementById('nicknameInput').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('registerBtn').click();});
 
