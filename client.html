@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DOTA 2 Online</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0e17;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Arial;
+      overflow: hidden;
+    }
+    canvas {
+      border: 2px solid #b89b4b;
+      border-radius: 10px;
+      background: #1d2b1a;
+    }
+    .login {
+      position: absolute;
+      background: #1a1e2a;
+      padding: 30px;
+      border-radius: 15px;
+      border: 2px solid #d4af37;
+      text-align: center;
+      color: #d4af37;
+      z-index: 10;
+    }
+    input {
+      padding: 12px;
+      font-size: 16px;
+      margin: 10px;
+      border-radius: 8px;
+      border: 1px solid #b89b4b;
+      background: #0f131c;
+      color: #e0d7b0;
+      text-align: center;
+    }
+    button {
+      padding: 12px 35px;
+      font-size: 18px;
+      background: #d4af37;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #ffd700; }
+    .hud {
+      display: flex;
+      gap: 20px;
+      color: white;
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .hint {
+      color: #888;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="1000" height="600"></canvas>
+  
+  <div class="login" id="loginScreen">
+    <h2>🎮 DOTA 2 ONLINE</h2>
+    <input type="text" id="nickInput" placeholder="Ваш никнейм" maxlength="12"><br>
+    <button onclick="startGame()">⚡ В БИТВУ</button>
+  </div>
+  
+  <div class="hud">
+    <span id="myName">⚔️ Герой</span>
+    <span>❤️ <span id="myHp">100</span></span>
+    <span>🏆 <span id="myKills">0</span></span>
+    <span>👥 Игроков: <span id="playerCount">1</span></span>
+  </div>
+  <div class="hint">🎮 WASD - движение | ПРОБЕЛ - атака</div>
+
+  <script>
+    let ws;
+    let myId;
+    let gameState = { players: [], enemies: [] };
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const keys = {};
+    
+    function startGame() {
+      const nickname = document.getElementById('nickInput').value.trim() || 'Игрок';
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('myName').textContent = '⚔️ ' + nickname;
+      
+      // Подключение к серверу
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}`;
+      
+      ws = new WebSocket(wsUrl);
+      
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'nickname', nickname }));
+      };
+      
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        
+        if (data.type === 'init') {
+          myId = data.playerId;
+        }
+        
+        if (data.type === 'update') {
+          gameState = data;
+          updateHUD();
+        }
+      };
+      
+      ws.onclose = () => {
+        alert('Соединение с сервером потеряно');
+      };
+    }
+    
+    function updateHUD() {
+      const me = gameState.players.find(p => p.id === myId);
+      if (me) {
+        document.getElementById('myHp').textContent = Math.floor(me.hp);
+        document.getElementById('myKills').textContent = me.kills;
+        document.getElementById('playerCount').textContent = gameState.players.length;
+      }
+    }
+    
+    // Управление
+    document.addEventListener('keydown', e => {
+      keys[e.key.toLowerCase()] = true;
+      if (e.key === ' ' && ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'attack' }));
+      }
+      e.preventDefault();
+    });
+    
+    document.addEventListener('keyup', e => {
+      keys[e.key.toLowerCase()] = false;
+    });
+    
+    function movePlayer() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) return;
+      
+      const me = gameState.players.find(p => p.id === myId);
+      if (!me) return;
+      
+      let dx = 0, dy = 0;
+      if (keys['w']) dy -= 1;
+      if (keys['s']) dy += 1;
+      if (keys['a']) dx -= 1;
+      if (keys['d']) dx += 1;
+      
+      if (dx || dy) {
+        const len = Math.sqrt(dx*dx + dy*dy);
+        const speed = 5;
+        const newX = me.x + (dx/len) * speed;
+        const newY = me.y + (dy/len) * speed;
+        
+        ws.send(JSON.stringify({
+          type: 'move',
+          x: Math.max(20, Math.min(980, newX)),
+          y: Math.max(20, Math.min(580, newY))
+        }));
+      }
+    }
+    
+    function draw() {
+      ctx.clearRect(0, 0, 1000, 600);
+      
+      // Фон
+      ctx.fillStyle = '#1d2b1a';
+      ctx.fillRect(0, 0, 1000, 600);
+      
+      // Враги
+      gameState.enemies.forEach(enemy => {
+        ctx.beginPath();
+        ctx.arc(enemy.x, enemy.y, 12, 0, Math.PI * 2);
+        ctx.fillStyle = enemy.hp > 0 ? '#8b0000' : '#333';
+        ctx.fill();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        if (enemy.hp > 0) {
+          ctx.fillStyle = '#ff0000';
+          ctx.fillRect(enemy.x - 10, enemy.y - 18, 20, 3);
+          ctx.fillStyle = '#00ff00';
+          ctx.fillRect(enemy.x - 10, enemy.y - 18, 20 * (enemy.hp/50), 3);
+        }
+      });
+      
+      // Игроки
+      gameState.players.forEach(player => {
+        if (player.hp <= 0) return;
+        
+        const isMe = player.id === myId;
+        
+        ctx.beginPath();
+        ctx.arc(player.x, player.y, isMe ? 17 : 14, 0, Math.PI * 2);
+        ctx.fillStyle = player.color;
+        ctx.fill();
+        ctx.strokeStyle = isMe ? '#fff' : '#000';
+        ctx.lineWidth = isMe ? 3 : 2;
+        ctx.stroke();
+        
+        // Никнейм
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(player.nickname, player.x, player.y - 22);
+      });
+    }
+    
+    setInterval(movePlayer, 1000/60);
+    
+    function gameLoop() {
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    gameLoop();
+  </script>
+</body>
+</html>
