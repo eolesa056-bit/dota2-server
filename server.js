@@ -15,7 +15,11 @@ const playerSkins = new Map();
 const playerHeroes = new Map();
 const friendsList = new Map();
 const partyMembers = new Map();
-const usedNicknames = new Map(); // ник -> id
+const usedNicknames = new Map();
+
+// ❗ АВТОСБРОС ROOT ПРИ ЗАПУСКЕ
+usedNicknames.delete('root');
+console.log('✅ Root сброшен при запуске');
 
 for (let i = 0; i < 15; i++) {
   enemies.push({ id: i, x: Math.random() * 1000, y: Math.random() * 600, hp: 60, maxHp: 60 });
@@ -42,7 +46,6 @@ const server = http.createServer(async (req, res) => {
   
   if (req.method === 'OPTIONS') { res.writeHead(200); res.end(); return; }
   
-  // Главная страница
   if (req.method === 'GET' && req.url === '/') {
     const filePath = path.join(__dirname, 'index.html');
     fs.readFile(filePath, 'utf8', (err, data) => {
@@ -53,7 +56,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Регистрация
   if (req.method === 'POST' && req.url === '/join') {
     const data = await readBody(req);
     const nickname = data.nickname.toLowerCase();
@@ -86,14 +88,9 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Состояние игры (с проверкой бана)
   if (req.method === 'GET' && req.url === '/state') {
-    // ❗ Проверяем баны и удаляем забаненных
     players = players.filter(p => {
-      if (bannedPlayers.has(p.nickname)) {
-        usedNicknames.delete(p.nickname);
-        return false;
-      }
+      if (bannedPlayers.has(p.nickname)) { usedNicknames.delete(p.nickname); return false; }
       return true;
     });
     
@@ -111,11 +108,9 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Проверка бана для конкретного игрока
   if (req.method === 'POST' && req.url === '/checkBan') {
     const data = await readBody(req);
-    const isBanned = bannedPlayers.has(data.nickname.toLowerCase());
-    sendJSON(res, { banned: isBanned });
+    sendJSON(res, { banned: bannedPlayers.has(data.nickname.toLowerCase()) });
     return;
   }
 
