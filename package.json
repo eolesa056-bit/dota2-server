@@ -1,8 +1,6 @@
 {
-  "name": "dota2-server",
+  "name": "dota2-game",
   "version": "1.0.0",
-  "description": "DOTA 2 Multiplayer Server",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
