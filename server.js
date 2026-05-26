@@ -6,6 +6,7 @@ const PORT = process.env.PORT || 8080;
 
 let players = [];
 let enemies = [];
+let reports = [];
 const promoCodes = new Map([['DOTA100', 100], ['DOTA500', 500], ['DOTA1000', 1000]]);
 const bpPromoCodes = new Map([['BPFREE', 'premium'], ['BPPLUS', 'plus']]);
 const bannedPlayers = new Set();
@@ -17,7 +18,6 @@ const friendsList = new Map();
 const partyMembers = new Map();
 const usedNicknames = new Map();
 
-// ❗ АВТОСБРОС ROOT ПРИ ЗАПУСКЕ
 usedNicknames.delete('root');
 console.log('✅ Root сброшен при запуске');
 
@@ -59,7 +59,6 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/join') {
     const data = await readBody(req);
     const nickname = data.nickname.toLowerCase();
-    
     if (bannedPlayers.has(nickname)) { sendJSON(res, { error: '⛔ Вы забанены!' }); return; }
     if (usedNicknames.has(nickname)) { sendJSON(res, { error: 'Ник занят!' }); return; }
     
@@ -73,10 +72,8 @@ const server = http.createServer(async (req, res) => {
     if (!partyMembers.has(nickname)) partyMembers.set(nickname, [nickname]);
     
     const player = {
-      id: playerId,
-      nickname: nickname,
-      x: Math.random() * 800 + 100,
-      y: Math.random() * 400 + 100,
+      id: playerId, nickname: nickname,
+      x: Math.random() * 800 + 100, y: Math.random() * 400 + 100,
       hp: 100, maxHp: 100, kills: 0,
       color: `hsl(${Math.random() * 360}, 70%, 50%)`,
       heroId: playerHeroes.get(nickname).heroId,
@@ -93,7 +90,6 @@ const server = http.createServer(async (req, res) => {
       if (bannedPlayers.has(p.nickname)) { usedNicknames.delete(p.nickname); return false; }
       return true;
     });
-    
     players.forEach(player => {
       if (player.hp <= 0) return;
       enemies.forEach(enemy => {
@@ -103,7 +99,6 @@ const server = http.createServer(async (req, res) => {
         if (dist < 30) player.hp -= 0.3;
       });
     });
-    
     sendJSON(res, { players, enemies: enemies.filter(e => e.hp > 0) });
     return;
   }
@@ -173,11 +168,10 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/ban') {
     const data = await readBody(req);
     if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
-    const target = data.target.toLowerCase();
-    bannedPlayers.add(target);
-    players = players.filter(p => p.nickname !== target);
-    usedNicknames.delete(target);
-    sendJSON(res, { success: true, target });
+    bannedPlayers.add(data.target.toLowerCase());
+    players = players.filter(p => p.nickname !== data.target.toLowerCase());
+    usedNicknames.delete(data.target.toLowerCase());
+    sendJSON(res, { success: true });
     return;
   }
 
@@ -192,7 +186,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/resetRoot') {
     usedNicknames.delete('root');
     players = players.filter(p => p.nickname !== 'root');
-    sendJSON(res, { success: true, message: 'Root сброшен!' });
+    sendJSON(res, { success: true });
     return;
   }
 
@@ -207,8 +201,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && req.url === '/giveCurrency') {
     const data = await readBody(req);
     if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
-    const target = data.target.toLowerCase();
-    playerWallets.set(target, (playerWallets.get(target) || 0) + data.amount);
+    playerWallets.set(data.target.toLowerCase(), (playerWallets.get(data.target.toLowerCase()) || 0) + data.amount);
     sendJSON(res, { success: true });
     return;
   }
@@ -256,6 +249,35 @@ const server = http.createServer(async (req, res) => {
     if (!party.includes(data.target.toLowerCase())) party.push(data.target.toLowerCase());
     partyMembers.set(data.nickname.toLowerCase(), party);
     sendJSON(res, { success: true, party });
+    return;
+  }
+
+  // РЕПОРТЫ
+  if (req.method === 'POST' && req.url === '/report') {
+    const data = await readBody(req);
+    reports.push({
+      id: Date.now().toString(),
+      from: data.from,
+      target: data.target,
+      reason: data.reason,
+      customText: data.customText || '',
+      time: new Date().toISOString()
+    });
+    console.log(`📩 Репорт: ${data.from} → ${data.target}: ${data.reason}`);
+    sendJSON(res, { success: true });
+    return;
+  }
+
+  if (req.method === 'GET' && req.url === '/reports') {
+    sendJSON(res, reports);
+    return;
+  }
+
+  if (req.method === 'POST' && req.url === '/clearReports') {
+    const data = await readBody(req);
+    if (data.admin !== 'root') { sendJSON(res, { error: 'Нет прав!' }); return; }
+    reports = [];
+    sendJSON(res, { success: true });
     return;
   }
 
